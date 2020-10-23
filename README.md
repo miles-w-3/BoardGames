@@ -1,8 +1,9 @@
 # BoardGames
 A project to build virtual board games in java, starting with chess.This is a side project I work on in my downtime. I chose it because it's fairly straightforward to implement the concrete rules of chess. Features are slowly added overtime.
 
-## Current Features
+## Current State
 Every piece is fully programmed with the proper set of moves, and detection for voluntary check.
+
 ## Needed Gameplay features
 *(in order of importance)*
 * force a side to move out of check
@@ -21,3 +22,4 @@ Every piece is fully programmed with the proper set of moves, and detection for 
 
 ## In the future...
 * Checkers
+* What next?
