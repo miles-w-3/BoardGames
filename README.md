@@ -1,5 +1,5 @@
-# BoardGames
-A project to build virtual board games in java, starting with chess.This is a side project I work on in my downtime. I chose it because it's fairly straightforward to implement the concrete rules of chess. Features are slowly added overtime.
+# BoardGames(Chess)
+A project to build virtual board games in java, starting with chess.This is a side project I work on and will add features to in my downtime.
 
 ## Current State
 Every piece is fully programmed with the proper set of moves, and detection for voluntary check.
