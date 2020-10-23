@@ -94,19 +94,29 @@ public class ChessModelImpl implements ChessModel {
         for (int f = 0; f < 8; f++) {
           // for any given piece, make sure that it cannot move to the location of the enemy king
           if (boardCopy[r][f] != null) {
-            // if its white turn, make sure that they will not expose their king
+            // white has just moved - since this variable only updates on actual moves
             if (whitesTurn) {
-              // white voluntary check if a black piece can now move to the location of the white king
-              if (!boardCopy[r][f].isFirst
+              // see if the white piece put the black king in check
+              if (!boardCopy[r][f].isFirst &&
+                boardCopy[r][f].canMoveTo(r, f, bKing[0], bKing[1], boardCopy)) {
+                bCheck = true;
+              }
+              // check if white would place itself in check with this move
+              else if (!boardCopy[r][f].isFirst
                   && boardCopy[r][f].canMoveTo(r, f, wKing[0], wKing[1], boardCopy)) {
                 throw new IllegalArgumentException("White side cannot expose its king!");
               }
-              //
+
             }
             // black turn
             else {
+              // see if the black piece put the white king in check
+              if (boardCopy[r][f].isFirst &&
+                  boardCopy[r][f].canMoveTo(r, f, wKing[0], wKing[1], boardCopy)) {
+                wCheck = true;
+              }
               // if a white piece can now move to the location of the black king
-              if (boardCopy[r][f].isFirst
+              else if (boardCopy[r][f].isFirst
                   && boardCopy[r][f].canMoveTo(r, f, bKing[0], bKing[1], boardCopy)) {
                 throw new IllegalArgumentException("Black side cannot expose its king!");
               }
