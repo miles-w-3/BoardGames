@@ -14,7 +14,7 @@ Every piece is fully programmed with the proper set of moves, and detection for 
 * Add en passant
 
 ## Future interface features
-*once gameplay features are done - not in particular order*
+*once gameplay features are done - not in any particular order*
 * Timer
 * Current side moving indicator
 * Captured pieces indicator and score
