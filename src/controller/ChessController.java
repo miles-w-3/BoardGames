@@ -26,8 +26,8 @@ public class ChessController implements BoardController, MouseListener {
 
   @Override
   public void playGame() {
-    while (true) {
-      view.updateGameBoard(model.getBoard());
+    while(true) {
+      view.updateGameScreen(model.getBoard());
       view.displayBoard();
     }
   }
@@ -36,6 +36,13 @@ public class ChessController implements BoardController, MouseListener {
   public void mouseClicked(MouseEvent e) {
     int newR = e.getY() / 100;
     int newF = e.getX() / 100;
+
+    //System.out.printf("NewR is %s, NewF is %s", newR, newF);
+
+    // Don't move if clicking outside of the board
+    if (!(newF < 8 && newR < 8)) {
+      return;
+    }
     AbstractGamePiece[][] board = model.getBoard();
 
     // make sure that the clicked from position has a piece in it and that it's on the team of the
@@ -57,14 +64,16 @@ public class ChessController implements BoardController, MouseListener {
       }
       try {
         model.movePiece(moveFrom[0], moveFrom[1], newR, newF);
-        view.updateGameBoard(model.getBoard());
+        view.updateGameScreen(model.getBoard());
         isWhiteSideTurn = !isWhiteSideTurn;
         model.deSelect(newR, newF); // unhighlight after move
         moveFrom = new Integer[2];
       } catch (IllegalArgumentException iae) {
+        // TODO: Move this to the status bar and avoid using a popup
         BoardView.throwWarningFrame("Move Error!", iae.getMessage());
       }
     }
+    view.displayInfo();
   }
 
   @Override

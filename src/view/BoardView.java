@@ -16,10 +16,15 @@ public interface BoardView {
   void displayBoard();
 
   /**
+   * Displays game info such as player turn and score.
+   */
+  void displayInfo();
+
+  /**
    * Updates the board state currently stored in the view.
    * @param gameBoard the current board state
    */
-  void updateGameBoard(AbstractGamePiece[][] gameBoard);
+  void updateGameScreen(AbstractGamePiece[][] gameBoard);
 
   /**
    * Create an error pop-up to display an error to the user.
