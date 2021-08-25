@@ -1,5 +1,6 @@
 package controller;
 
+import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
@@ -104,8 +105,7 @@ public class ChessController implements BoardController, MouseListener {
           view.updateGameScreen(model.getBoardIcons());
           toggleTurn();
         } catch (IllegalArgumentException iae) {
-          // TODO: Move this to the info bar and avoid using a popup
-          BoardView.throwWarningFrame("Move Error!", iae.getMessage());
+          view.setMessage("Move Error - " + iae.getMessage(), Color.RED);
         }
       }
     }
@@ -120,7 +120,8 @@ public class ChessController implements BoardController, MouseListener {
     else {
       currentTurn = PlayerSide.WHITE;
     }
-
+    // clear out info message
+    view.setMessage("", Color.BLACK);
     view.setTurnInfo(currentTurn);
     // set score info
     view.setCurrentScore(score.get(PlayerSide.WHITE), score.get(PlayerSide.BLACK));

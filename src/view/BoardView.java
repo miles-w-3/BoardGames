@@ -1,5 +1,6 @@
 package view;
 
+import java.awt.Color;
 import java.awt.event.MouseListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -28,14 +29,21 @@ public interface BoardView {
   void setTurnInfo(PlayerSide currentSide);
 
   /**
-   * Set the space which should be highlighted as currently selected
+   * Set the space which should be highlighted as currently selected.
    */
   void setCurrentlySelected(Coordinate selected);
 
   /**
-   * Set the current score for both sides
+   * Set the current score for both sides.
    */
   void setCurrentScore(int whiteScore, int blackScore);
+
+  /**
+   * Set a colored message for the user to view.
+   * @param msg Message contents
+   * @param msgColor Message color object
+   */
+  void setMessage(String msg, Color msgColor);
 
   /**
    * Updates the board state currently stored in the view.

@@ -11,6 +11,8 @@ import javax.swing.JPanel;
 public class ChessInfoPanel extends JPanel{
   protected int whiteScore;
   protected int blackScore;
+  protected Color msgColor;
+  protected String msgText;
   protected PlayerSide currentTurn;
 
   ChessInfoPanel(Dimension size){
@@ -26,14 +28,17 @@ public class ChessInfoPanel extends JPanel{
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
     Graphics2D g2d = (Graphics2D) g;
-    this.setBackground(Color.gray);
+    this.setBackground(Color.lightGray);
 
     g2d.setStroke(new BasicStroke(0.1f));
     g2d.setColor(Color.BLACK);
     g2d.drawString("Current turn: " + currentTurn.name(), 1, 12);
     g2d.drawString("White " + whiteScore + " - " + blackScore + " Black", 1, 24);
-    //g2d.fillRect(10, 10, 50, 10);
-    //g2d.fillRect(10, 10, 50, 10);
+
+    if (msgText != null && msgColor != null) {
+      g2d.setColor(msgColor);
+      g2d.drawString(msgText, 1, 36);
+    }
   }
 }
 

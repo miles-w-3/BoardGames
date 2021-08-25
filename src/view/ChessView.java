@@ -1,5 +1,6 @@
 package view;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.MouseListener;
@@ -35,15 +36,10 @@ public class ChessView extends JFrame implements BoardView {
 
     // add panel with main chess board
     boardPanel = new ChessBoardPanel(new Dimension(FRAME_WIDTH, FRAME_HEIGHT));
-    // Don't want a scroller for now, working with fixed heights
-    //JScrollPane scroller = new JScrollPane(this.boardPanel);
-    //this.add(scroller, BorderLayout.CENTER);
-    mainPanel.add(boardPanel); // instead, directly add board panel
+    mainPanel.add(boardPanel);
 
     // add panel with game info
     // set info panel with leftover screen size
-    // TODO: Figure out how to get on top of each other, maybe using BorderLayout
-    // TODO: Answer: Create one unified ContentPanel using the BoxLayout and add all of the panels to it
     infoPanel = new ChessInfoPanel(new Dimension(FRAME_WIDTH, 40));
     mainPanel.add(infoPanel);
   }
@@ -83,6 +79,12 @@ public class ChessView extends JFrame implements BoardView {
   public void setCurrentScore(int whiteScore, int blackScore) {
     this.infoPanel.whiteScore = whiteScore;
     this.infoPanel.blackScore = blackScore;
+  }
+
+  @Override
+  public void setMessage(String msg, Color msgColor) {
+    infoPanel.msgColor = msgColor;
+    infoPanel.msgText = msg;
   }
 
 
