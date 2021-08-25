@@ -7,6 +7,7 @@ import java.util.HashMap;
 import model.AbstractGamePiece;
 import model.ChessModel;
 import model.ChessModelImpl;
+import util.ChessMoveException;
 import util.Coordinate;
 import util.PlayerSide;
 import view.BoardView;
@@ -81,14 +82,12 @@ public class ChessController implements BoardController, MouseListener {
 
     // highlight a clicked location if it contains a piece from the playing side
     if (board[newR][newF] != null && board[newR][newF].getSide() == currentTurn) {
-      System.out.println("In here1!");
       moveFrom.update(newR, newF);
 
       view.setCurrentlySelected(moveFrom);
     }
     // valid move from selection cases
     else if (moveFrom.isValid()) {
-      System.out.println("In here2!");
       // deselect a piece if its the same as the one currently highlighted
       if (newR == moveFrom.rank && newF == moveFrom.file) {
         view.setCurrentlySelected(new Coordinate());
@@ -97,15 +96,17 @@ public class ChessController implements BoardController, MouseListener {
       else {
         try {
           // move piece and update score
-          int takenValue = model.movePiece(moveFrom.rank, moveFrom.file, newR, newF);
+          int takenValue = model.movePiece(currentTurn, moveFrom.rank, moveFrom.file, newR, newF);
           if (takenValue > 0) {
             score.replace(currentTurn, score.get(currentTurn) + takenValue);
           }
           // update view information
           view.updateGameScreen(model.getBoardIcons());
           toggleTurn();
+        } catch (ChessMoveException cme) {
+          view.setMessage("Move Error - " + cme.getMessage(), Color.RED);
         } catch (IllegalArgumentException iae) {
-          view.setMessage("Move Error - " + iae.getMessage(), Color.RED);
+          BoardView.throwErrorFrame("Position error", iae.getMessage());
         }
       }
     }

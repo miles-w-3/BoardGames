@@ -30,6 +30,11 @@ public class Coordinate {
     return rank > -1 && file > -1;
   }
 
+  // true if the given rank and file match the coordinate's
+  public boolean match(int rank, int file) {
+    return this.rank == rank && this.file == file;
+  }
+
 
 
 

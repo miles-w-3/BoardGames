@@ -4,23 +4,26 @@ package model;
 // but the model has to say if there is another piece in the way or if it is outside of the board area
 
 import java.awt.Image;
+import util.ChessMoveException;
+import util.PlayerSide;
 
 public interface ChessModel {
 
   /**
    * Move a selected chess piece to the desired position.
    *
-   * @param fromRank the rank that the piece is moving from
-   * @param fromFile the file that the piece is moving from
-   * @param toRank   the rank that the piece is moving to
-   * @param toFile   the file that the piece is moving to
-   * @throws IllegalArgumentException if either set of coordinates are out of bounds
-   * @throws IllegalArgumentException if there is an allied piece in the destination
-   * @throws IllegalArgumentException if there are obstacles in the path of the move
-   *
+   * @param currentTurn the side making the move
+   * @param fromRank    the rank that the piece is moving from
+   * @param fromFile    the file that the piece is moving from
+   * @param toRank      the rank that the piece is moving to
+   * @param toFile      the file that the piece is moving to
    * @return the value of a piece that was taken during the move, or zero if no piece was taken
+   * @throws IllegalArgumentException if either set of coordinates are out of bounds
+   * @throws ChessMoveException       if there are obstacles in the path of the move or the move is
+   *                                  illegal
    */
-  int movePiece(int fromRank, int fromFile, int toRank, int toFile);
+  int movePiece(PlayerSide currentTurn, int fromRank, int fromFile, int toRank, int toFile)
+      throws ChessMoveException;
 
   /**
    * Get a copy of the current board and the pieces on it
@@ -31,6 +34,7 @@ public interface ChessModel {
 
   /**
    * Return the board grid with piece images at their current locations
+   *
    * @return
    */
   Image[][] getBoardIcons();
