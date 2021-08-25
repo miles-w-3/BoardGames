@@ -13,7 +13,7 @@ public class King extends AbstractGamePiece {
    * @param icon The image that will be displayed to represent this piece
    */
   protected King(PlayerSide side, Image icon) {
-    super(side, icon);
+    super(side, icon, 0); // Since king is priceless, don't let value affect end score
   }
 
   @Override
@@ -56,9 +56,7 @@ public class King extends AbstractGamePiece {
   }
 
   public King copy() {
-    King c = new King(side, pieceImg);
-    c.isSelected = this.isSelected;
-    return c;
+    return new King(side, pieceImg);
   }
 
 }

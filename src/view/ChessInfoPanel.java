@@ -31,6 +31,7 @@ public class ChessInfoPanel extends JPanel{
     g2d.setStroke(new BasicStroke(0.1f));
     g2d.setColor(Color.BLACK);
     g2d.drawString("Current turn: " + currentTurn.name(), 1, 12);
+    g2d.drawString("White " + whiteScore + " - " + blackScore + " Black", 1, 24);
     //g2d.fillRect(10, 10, 50, 10);
     //g2d.fillRect(10, 10, 50, 10);
   }

@@ -11,9 +11,10 @@ import view.BoardView;
 public class ChessModelImpl implements ChessModel {
 
   AbstractGamePiece[][] board;
-  // store the king's coordinates at all times TODO: Why!? did I do this
+  // store the king's coordinates at all times TODO: Why!? did I do this - is sweeping through board to find king that inefficient? If so switch to the Coordinate class
   int[] whiteKingCoords;
   int[] blackKingCoords;
+  // TODO: Get rid of this whitesTurn variable, get that info from the controller if it's actually needed, can be passed in with MovesPiece
   boolean whitesTurn;
   boolean bCheck;
   boolean wCheck;
@@ -66,7 +67,7 @@ public class ChessModelImpl implements ChessModel {
       board[7][6] = new Knight(PlayerSide.WHITE, wKnight);
       // black king and queen
       board[0][3] = new Queen(PlayerSide.BLACK, bQueen);
-      board[0][4] = new King(PlayerSide.BLACK, wKing);
+      board[0][4] = new King(PlayerSide.BLACK, bKing);
       blackKingCoords[0] = 0;
       blackKingCoords[1] = 4;
       // white king and queen
@@ -89,7 +90,7 @@ public class ChessModelImpl implements ChessModel {
   }
 
   @Override
-  public void movePiece(int fromRank, int fromFile, int toRank, int toFile) {
+  public int movePiece(int fromRank, int fromFile, int toRank, int toFile) {
     AbstractGamePiece selectedPiece;
     AbstractGamePiece destinationPiece;
     // check that all coordinates are within the board area
@@ -103,6 +104,7 @@ public class ChessModelImpl implements ChessModel {
     if (selectedPiece == null) {
       throw new IllegalArgumentException("There is no piece at the selected starting space.");
     }
+    // TODO: This is no longer needed because Selection of a new allied piece is handled in the controller
     // make sure that the destination does not have a piece from the same team
     if (destinationPiece != null && destinationPiece.side == selectedPiece.side) {
       throw new IllegalArgumentException("There is already an allied piece in that destination.");
@@ -121,6 +123,7 @@ public class ChessModelImpl implements ChessModel {
         for (int f = 0; f < 8; f++) {
           // for any given piece, make sure that it cannot move to the location of the enemy king
           if (boardCopy[r][f] != null) {
+            // TODO: Eliminate this confusion. Want to know who the current turn is, not who just moved, especially if that's the variable name
             // white has just moved - since this variable only updates on actual moves
             if (whitesTurn) {
               // see if the white piece put the black king in check
@@ -163,9 +166,15 @@ public class ChessModelImpl implements ChessModel {
         blackKingCoords[1] = toFile;
       }
 
+      int takenPieceValue = 0;
+      // if a piece is being taken, get its value for scoring
+      if (board[toRank][toFile] != null) {
+        takenPieceValue = board[toRank][toFile].value;
+      }
       board[toRank][toFile] = board[fromRank][fromFile];
       board[fromRank][fromFile] = null;
       whitesTurn = !whitesTurn; // change turn side
+      return takenPieceValue;
     }
     // move is not allowed
     else {
@@ -197,21 +206,6 @@ public class ChessModelImpl implements ChessModel {
       }
     }
     return boardPieceImages;
-  }
-
-  @Override
-  public boolean isSelected(int r, int f) {
-    return board[r][f].isSelected;
-  }
-
-  @Override
-  public void select(int r, int f) {
-    board[r][f].select();
-  }
-
-  @Override
-  public void deSelect(int r, int f) {
-    board[r][f].deSelect();
   }
 
 }

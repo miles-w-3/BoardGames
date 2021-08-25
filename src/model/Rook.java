@@ -15,7 +15,7 @@ public class Rook extends AbstractGamePiece {
    * @param icon The image that will be displayed to represent this piece
    */
   protected Rook(PlayerSide side, Image icon) {
-    super(side, icon);
+    super(side, icon, 5);
   }
 
   @Override
@@ -75,8 +75,6 @@ public class Rook extends AbstractGamePiece {
   }
 
   public Rook copy() {
-    Rook c = new Rook(side, pieceImg);
-    c.isSelected = this.isSelected;
-    return c;
+    return new Rook(side, pieceImg);
   }
 }

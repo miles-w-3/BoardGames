@@ -9,7 +9,7 @@ import util.PlayerSide;
  */
 public abstract class AbstractGamePiece {
 
-  protected boolean isSelected;
+  protected final int value; // the value of the piece to the score
   protected Image pieceImg;
   protected PlayerSide side;
 
@@ -18,9 +18,10 @@ public abstract class AbstractGamePiece {
    * @param side The side this piece belongs to
    * @param icon The image that will be displayed to represent this piece
    */
-  protected AbstractGamePiece(PlayerSide side, Image icon) {
+  protected AbstractGamePiece(PlayerSide side, Image icon, int value) {
     this.side = side;
     this.pieceImg = icon;
+    this.value = value;
   }
 
   /**
@@ -44,26 +45,6 @@ public abstract class AbstractGamePiece {
     return this.side;
   }
 
-  /**
-   * Highlights this piece
-   */
-  public void select() {
-    this.isSelected = true;
-  }
-
-  /**
-   * Removes highlight from this piece
-   */
-  public void deSelect() {
-    this.isSelected = false;
-  }
-
-  /**
-   * @return true if this piece is selected
-   */
-  public boolean isSelected(){
-    return this.isSelected;
-  }
 
   /**
    * Copy this piece

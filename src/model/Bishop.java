@@ -14,7 +14,7 @@ public class Bishop extends AbstractGamePiece {
    * @param icon The image that will be displayed to represent this piece
    */
   protected Bishop(PlayerSide side, Image icon) {
-    super(side, icon);
+    super(side, icon, 3);
   }
 
   /**
@@ -64,8 +64,6 @@ public class Bishop extends AbstractGamePiece {
   }
 
   public Bishop copy() {
-    Bishop c = new Bishop(side, pieceImg);
-    c.isSelected = this.isSelected;
-    return c;
+    return new Bishop(side, pieceImg);
   }
 }

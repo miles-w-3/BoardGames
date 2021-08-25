@@ -14,7 +14,7 @@ public class Pawn extends AbstractGamePiece {
    * @param icon The image that will be displayed to represent this piece
    */
   protected Pawn(PlayerSide side, Image icon) {
-    super(side, icon);
+    super(side, icon, 1);
     hasMoved = false;
   }
 
@@ -78,7 +78,7 @@ public class Pawn extends AbstractGamePiece {
 
   public Pawn copy() {
     Pawn c = new Pawn(side, pieceImg);
-    c.isSelected = this.isSelected;
+    c.hasMoved = this.hasMoved;
     return c;
   }
 

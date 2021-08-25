@@ -21,7 +21,7 @@ public class Queen extends AbstractGamePiece {
    * @param icon The image that will be displayed to represent this piece
    */
   protected Queen(PlayerSide side, Image icon) {
-    super(side, icon);
+    super(side, icon, 9);
     this.rookMoves = new Rook(side, icon);
     this.bishopMoves = new Bishop(side, icon);
   }
@@ -40,9 +40,7 @@ public class Queen extends AbstractGamePiece {
   }
 
   public Queen copy() {
-    Queen c = new Queen(side, pieceImg);
-    c.isSelected = this.isSelected;
-    return c;
+    return new Queen(side, pieceImg);
   }
 
 

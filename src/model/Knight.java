@@ -5,7 +5,6 @@ import util.PlayerSide;
 
 public class Knight extends AbstractGamePiece {
 
-
   /**
    * Create a game piece and assign its team.
    *
@@ -13,7 +12,8 @@ public class Knight extends AbstractGamePiece {
    * @param icon The image that will be displayed to represent this piece
    */
   protected Knight(PlayerSide side, Image icon) {
-    super(side, icon);
+    super(side, icon, 3);
+
   }
 
   @Override
@@ -32,9 +32,7 @@ public class Knight extends AbstractGamePiece {
   }
 
   public Knight copy() {
-    Knight c = new Knight(side, pieceImg);
-    c.isSelected = this.isSelected;
-    return c;
+    return new Knight(side, pieceImg);
   }
 
 }

@@ -17,8 +17,10 @@ public interface ChessModel {
    * @throws IllegalArgumentException if either set of coordinates are out of bounds
    * @throws IllegalArgumentException if there is an allied piece in the destination
    * @throws IllegalArgumentException if there are obstacles in the path of the move
+   *
+   * @return the value of a piece that was taken during the move, or zero if no piece was taken
    */
-  void movePiece(int fromRank, int fromFile, int toRank, int toFile);
+  int movePiece(int fromRank, int fromFile, int toRank, int toFile);
 
   /**
    * Get a copy of the current board and the pieces on it
@@ -32,30 +34,6 @@ public interface ChessModel {
    * @return
    */
   Image[][] getBoardIcons();
-
-  /**
-   * @param r the row of the desired piece
-   * @param f the file of the desired piece
-   *
-   * @return true if the given piece is selected
-   */
-  boolean isSelected(int r, int f);
-
-  /**
-   * Select the given piece.
-   *
-   * @param r the row of the desired piece
-   * @param f the file of the desired piece
-   */
-  void select(int r, int f);
-
-  /**
-   * deSelect the given piece.
-   *
-   * @param r the row of the desired piece
-   * @param f the file of the desired piece
-   */
-  void deSelect(int r, int f);
 
 
 }

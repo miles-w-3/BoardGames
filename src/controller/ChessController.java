@@ -2,9 +2,11 @@ package controller;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.HashMap;
 import model.AbstractGamePiece;
 import model.ChessModel;
 import model.ChessModelImpl;
+import util.Coordinate;
 import util.PlayerSide;
 import view.BoardView;
 import view.ChessView;
@@ -13,15 +15,21 @@ public class ChessController implements BoardController, MouseListener {
 
   private ChessModel model;
   private BoardView view;
-  private Integer[] moveFrom; // stores fromR, fromF if they exist, null otherwise
+  private Coordinate moveFrom; // stores fromR, fromF if they exist, null otherwise
   private PlayerSide currentTurn;
+  private HashMap<PlayerSide, Integer> score;
 
 
   public ChessController() {
+    // initialize scorekeeping
+    score = new HashMap<>();
+    score.put(PlayerSide.WHITE, 0);
+    score.put(PlayerSide.BLACK, 0);
+
     model = new ChessModelImpl();
     view = new ChessView();
+    moveFrom = new Coordinate();
     view.setMouseListener(this);
-    moveFrom = new Integer[2];
     currentTurn = PlayerSide.WHITE;
   }
 
@@ -36,58 +44,7 @@ public class ChessController implements BoardController, MouseListener {
 
   @Override
   public void mouseClicked(MouseEvent e) {
-    int newR = e.getY() / 100;
-    int newF = e.getX() / 100;
 
-    //System.out.printf("NewR is %s, NewF is %s", newR, newF);
-
-    // Don't move if clicking outside of the board
-    if (!(newF < 8 && newR < 8)) {
-      return;
-    }
-    AbstractGamePiece[][] board = model.getBoard();
-    // TODO: Selected box has to be set back to null after each move is successfully made, also get rid of select stuff in model as that will just be tracked in controller.z
-
-    // make sure that the clicked from position has a piece in it and that it's on the team of the
-    // person playing right now
-    if (board[newR][newF] != null && board[newR][newF].getSide() == currentTurn) {
-      // deselect the previous piece if there is one
-      if (moveFrom[0] != null && moveFrom[1] != null) {
-        model.deSelect(moveFrom[0], moveFrom[1]);
-      }
-      moveFrom[0] = newR;
-      moveFrom[1] = newF;
-      model.select(moveFrom[0], moveFrom[1]);
-    }
-    // if the from move has been chosen, look for a to position
-    else if (moveFrom[0] != null && moveFrom[1] != null) {
-      // deselect a piece if its the same as the one currently highlighted
-      if (newR == moveFrom[0] && newF == moveFrom[1]) {
-        model.deSelect(moveFrom[0], moveFrom[1]);
-      }
-      try {
-        model.movePiece(moveFrom[0], moveFrom[1], newR, newF);
-        view.updateGameScreen(model.getBoardIcons());
-        toggleTurn();
-        model.deSelect(newR, newF); // unhighlight after move
-        moveFrom = new Integer[2];
-      } catch (IllegalArgumentException iae) {
-        // TODO: Move this to the status bar and avoid using a popup
-        BoardView.throwWarningFrame("Move Error!", iae.getMessage());
-      }
-    }
-   view.displayInfo();
-  }
-
-  // Change to the other side's turn
-  public void toggleTurn() {
-    if (currentTurn == PlayerSide.WHITE) {
-      currentTurn = PlayerSide.BLACK;
-    }
-    else {
-      currentTurn = PlayerSide.WHITE;
-    }
-    view.setTurnInfo(currentTurn);
   }
 
   @Override
@@ -96,8 +53,9 @@ public class ChessController implements BoardController, MouseListener {
   }
 
   @Override
+  // handle in mouseReleased rather than mouseClicked to make movement more forgiving
   public void mouseReleased(MouseEvent e) {
-
+    handleUserClick(e);
   }
 
   @Override
@@ -108,5 +66,66 @@ public class ChessController implements BoardController, MouseListener {
   @Override
   public void mouseExited(MouseEvent e) {
 
+  }
+
+  // helper to handle click across mouse listeners
+  private void handleUserClick(MouseEvent event) {
+    int newR = event.getY() / 100;
+    int newF = event.getX() / 100;
+    // Don't move if clicking outside of the board
+    if (!(newF < 8 && newR < 8)) {
+      return;
+    }
+    AbstractGamePiece[][] board = model.getBoard();
+
+    // highlight a clicked location if it contains a piece from the playing side
+    if (board[newR][newF] != null && board[newR][newF].getSide() == currentTurn) {
+      System.out.println("In here1!");
+      moveFrom.update(newR, newF);
+
+      view.setCurrentlySelected(moveFrom);
+    }
+    // valid move from selection cases
+    else if (moveFrom.isValid()) {
+      System.out.println("In here2!");
+      // deselect a piece if its the same as the one currently highlighted
+      if (newR == moveFrom.rank && newF == moveFrom.file) {
+        view.setCurrentlySelected(new Coordinate());
+      }
+      // if from coords are selected and player is not clicking one of their pieces, attempt to move
+      else {
+        try {
+          // move piece and update score
+          int takenValue = model.movePiece(moveFrom.rank, moveFrom.file, newR, newF);
+          if (takenValue > 0) {
+            score.replace(currentTurn, score.get(currentTurn) + takenValue);
+          }
+          // update view information
+          view.updateGameScreen(model.getBoardIcons());
+          toggleTurn();
+        } catch (IllegalArgumentException iae) {
+          // TODO: Move this to the info bar and avoid using a popup
+          BoardView.throwWarningFrame("Move Error!", iae.getMessage());
+        }
+      }
+    }
+    view.displayInfo();
+  }
+
+  // Change to the other side's turn
+  private void toggleTurn() {
+    if (currentTurn == PlayerSide.WHITE) {
+      currentTurn = PlayerSide.BLACK;
+    }
+    else {
+      currentTurn = PlayerSide.WHITE;
+    }
+
+    view.setTurnInfo(currentTurn);
+    // set score info
+    view.setCurrentScore(score.get(PlayerSide.WHITE), score.get(PlayerSide.BLACK));
+    // clear the moveFrom tracker and selection
+    moveFrom = new Coordinate();
+    view.setCurrentlySelected(moveFrom);
   }
 }
