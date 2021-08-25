@@ -3,6 +3,8 @@ package model;
 // the individual pieces can just say if the move is consistent with what's allowed for them. Eg a bishop will return if the move is a proper diagonal
 // but the model has to say if there is another piece in the way or if it is outside of the board area
 
+import java.awt.Image;
+
 public interface ChessModel {
 
   /**
@@ -24,6 +26,12 @@ public interface ChessModel {
    * @return A 2D array of game pieces, where null represents an empty space
    */
   AbstractGamePiece[][] getBoard();
+
+  /**
+   * Return the board grid with piece images at their current locations
+   * @return
+   */
+  Image[][] getBoardIcons();
 
   /**
    * @param r the row of the desired piece

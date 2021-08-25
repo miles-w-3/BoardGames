@@ -9,27 +9,30 @@ import java.awt.Graphics2D;
 import javax.swing.JPanel;
 
 public class ChessInfoPanel extends JPanel{
-  int whiteScore;
-  int blackScore;
-  PlayerSide currentTurn;
+  protected int whiteScore;
+  protected int blackScore;
+  protected PlayerSide currentTurn;
 
   ChessInfoPanel(Dimension size){
-    this.setSize(size);
-    this.setBackground(Color.LIGHT_GRAY);
+    this.setPreferredSize(size);
+    // initialize current turn to white
     currentTurn = PlayerSide.WHITE;
     whiteScore = 0;
     blackScore = 0;
+    // TODO: For in the future if we want to set a font size
   }
 
   @Override
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
     Graphics2D g2d = (Graphics2D) g;
-    this.setBackground(Color.LIGHT_GRAY);
+    this.setBackground(Color.gray);
 
     g2d.setStroke(new BasicStroke(0.1f));
-    g2d.setColor(Color.CYAN);
-    g2d.drawString("This is a test draw", 0, 0);
+    g2d.setColor(Color.BLACK);
+    g2d.drawString("Current turn: " + currentTurn.name(), 1, 12);
+    //g2d.fillRect(10, 10, 50, 10);
+    //g2d.fillRect(10, 10, 50, 10);
   }
 }
 

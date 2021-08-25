@@ -5,6 +5,7 @@ import java.awt.event.MouseListener;
 import model.AbstractGamePiece;
 import model.ChessModel;
 import model.ChessModelImpl;
+import util.PlayerSide;
 import view.BoardView;
 import view.ChessView;
 
@@ -13,7 +14,7 @@ public class ChessController implements BoardController, MouseListener {
   private ChessModel model;
   private BoardView view;
   private Integer[] moveFrom; // stores fromR, fromF if they exist, null otherwise
-  private boolean isWhiteSideTurn;
+  private PlayerSide currentTurn;
 
 
   public ChessController() {
@@ -21,14 +22,15 @@ public class ChessController implements BoardController, MouseListener {
     view = new ChessView();
     view.setMouseListener(this);
     moveFrom = new Integer[2];
-    isWhiteSideTurn = true;
+    currentTurn = PlayerSide.WHITE;
   }
 
   @Override
   public void playGame() {
     while(true) {
-      view.updateGameScreen(model.getBoard());
+      view.updateGameScreen(model.getBoardIcons());
       view.displayBoard();
+      view.displayInfo();
     }
   }
 
@@ -44,10 +46,11 @@ public class ChessController implements BoardController, MouseListener {
       return;
     }
     AbstractGamePiece[][] board = model.getBoard();
+    // TODO: Selected box has to be set back to null after each move is successfully made, also get rid of select stuff in model as that will just be tracked in controller.z
 
     // make sure that the clicked from position has a piece in it and that it's on the team of the
     // person playing right now
-    if (board[newR][newF] != null && board[newR][newF].movesFirst() == isWhiteSideTurn) {
+    if (board[newR][newF] != null && board[newR][newF].getSide() == currentTurn) {
       // deselect the previous piece if there is one
       if (moveFrom[0] != null && moveFrom[1] != null) {
         model.deSelect(moveFrom[0], moveFrom[1]);
@@ -64,8 +67,8 @@ public class ChessController implements BoardController, MouseListener {
       }
       try {
         model.movePiece(moveFrom[0], moveFrom[1], newR, newF);
-        view.updateGameScreen(model.getBoard());
-        isWhiteSideTurn = !isWhiteSideTurn;
+        view.updateGameScreen(model.getBoardIcons());
+        toggleTurn();
         model.deSelect(newR, newF); // unhighlight after move
         moveFrom = new Integer[2];
       } catch (IllegalArgumentException iae) {
@@ -73,7 +76,18 @@ public class ChessController implements BoardController, MouseListener {
         BoardView.throwWarningFrame("Move Error!", iae.getMessage());
       }
     }
-    view.displayInfo();
+   view.displayInfo();
+  }
+
+  // Change to the other side's turn
+  public void toggleTurn() {
+    if (currentTurn == PlayerSide.WHITE) {
+      currentTurn = PlayerSide.BLACK;
+    }
+    else {
+      currentTurn = PlayerSide.WHITE;
+    }
+    view.setTurnInfo(currentTurn);
   }
 
   @Override

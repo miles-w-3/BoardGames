@@ -1,9 +1,19 @@
 package model;
 
+import java.awt.Image;
+import util.PlayerSide;
+
 public class Knight extends AbstractGamePiece {
 
-  protected Knight(boolean isFirst) {
-    super(isFirst);
+
+  /**
+   * Create a game piece and assign its team.
+   *
+   * @param side The side this piece belongs to
+   * @param icon The image that will be displayed to represent this piece
+   */
+  protected Knight(PlayerSide side, Image icon) {
+    super(side, icon);
   }
 
   @Override
@@ -22,7 +32,7 @@ public class Knight extends AbstractGamePiece {
   }
 
   public Knight copy() {
-    Knight c = new Knight(isFirst);
+    Knight c = new Knight(side, pieceImg);
     c.isSelected = this.isSelected;
     return c;
   }

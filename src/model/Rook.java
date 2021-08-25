@@ -1,14 +1,22 @@
 package model;
 
+import java.awt.Image;
+import util.PlayerSide;
+
 /**
  * Represents a rook on either side. Allows vertical and horizontal moves.
  */
 public class Rook extends AbstractGamePiece {
 
-  public Rook(boolean isWhite) {
-    super(isWhite);
+  /**
+   * Create a game piece and assign its team.
+   *
+   * @param side The side this piece belongs to
+   * @param icon The image that will be displayed to represent this piece
+   */
+  protected Rook(PlayerSide side, Image icon) {
+    super(side, icon);
   }
-
 
   @Override
   protected boolean canMoveTo(int fromRank, int fromFile, int toRank, int toFile,
@@ -67,7 +75,7 @@ public class Rook extends AbstractGamePiece {
   }
 
   public Rook copy() {
-    Rook c = new Rook(isFirst);
+    Rook c = new Rook(side, pieceImg);
     c.isSelected = this.isSelected;
     return c;
   }

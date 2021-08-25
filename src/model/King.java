@@ -1,9 +1,19 @@
 package model;
 
+import java.awt.Image;
+import util.PlayerSide;
+
 public class King extends AbstractGamePiece {
 
-  protected King(boolean isFirst) {
-    super(isFirst);
+
+  /**
+   * Create a game piece and assign its team.
+   *
+   * @param side The side this piece belongs to
+   * @param icon The image that will be displayed to represent this piece
+   */
+  protected King(PlayerSide side, Image icon) {
+    super(side, icon);
   }
 
   @Override
@@ -26,7 +36,7 @@ public class King extends AbstractGamePiece {
         for(int f = 0; f < 8; f++){
           // we want to make sure that every enemy piece on the board cannot move to where
           // the king is moving right now
-          if (gameBoard[r][f] != null && gameBoard[r][f].isFirst != this.isFirst){
+          if (gameBoard[r][f] != null && gameBoard[r][f].side != this.side){
             // specifically check if a piece can move to our desired location
             if (gameBoard[r][f].canMoveTo(r, f, toRank, toFile, gameBoard)) {
               throw new IllegalArgumentException("You cannot move your king into check!");
@@ -46,7 +56,7 @@ public class King extends AbstractGamePiece {
   }
 
   public King copy() {
-    King c = new King(isFirst);
+    King c = new King(side, pieceImg);
     c.isSelected = this.isSelected;
     return c;
   }

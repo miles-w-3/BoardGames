@@ -1,19 +1,27 @@
 package model;
 
+import java.awt.Image;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageIO;
+import util.PlayerSide;
+import view.BoardView;
+
 public class ChessModelImpl implements ChessModel {
 
   AbstractGamePiece[][] board;
-  // store the king's coordinates at all times
-  int[] wKing;
-  int[] bKing;
+  // store the king's coordinates at all times TODO: Why!? did I do this
+  int[] whiteKingCoords;
+  int[] blackKingCoords;
   boolean whitesTurn;
   boolean bCheck;
   boolean wCheck;
 
   public ChessModelImpl() {
     board = new AbstractGamePiece[8][8];
-    wKing = new int[2];
-    bKing = new int[2];
+    whiteKingCoords = new int[2];
+    blackKingCoords = new int[2];
     whitesTurn = true;
     this.setupBoard();
     bCheck = false;
@@ -21,43 +29,62 @@ public class ChessModelImpl implements ChessModel {
 
   }
 
-  // place all pieces on their starting positions 
+  // initializes all pieces at their starting positions
   private void setupBoard() {
-    // black rooks
-    board[0][0] = new Rook(false);
-    board[0][7] = new Rook(false);
-    // white rooks
-    board[7][0] = new Rook(true);
-    board[7][7] = new Rook(true);
-    // black bishops
-    board[0][2] = new Bishop(false);
-    board[0][5] = new Bishop(false);
-    // white bishops
-    board[7][2] = new Bishop(true);
-    board[7][5] = new Bishop(true);
-    // black knights
-    board[0][1] = new Knight(false);
-    board[0][6] = new Knight(false);
-    // white knights
-    board[7][1] = new Knight(true);
-    board[7][6] = new Knight(true);
-    // black king and queen
-    board[0][3] = new Queen(false);
-    board[0][4] = new King(false);
-    bKing[0] = 0;
-    bKing[1] = 4;
-    // white king and queen
-    board[7][3] = new Queen(true);
-    board[7][4] = new King(true);
-    wKing[0] = 7;
-    wKing[1] = 4;
+    // read the images from disk once
+    try {
+      Image wRook = ImageIO.read(new File("resources/wRook.png"));
+      Image bRook = ImageIO.read(new File("resources/bRook.png"));
+      Image wKnight = ImageIO.read(new File("resources/wKnight.png"));
+      Image bKnight = ImageIO.read(new File("resources/bKnight.png"));
+      Image wBishop = ImageIO.read(new File("resources/wBish.png"));
+      Image bBishop = ImageIO.read(new File("resources/bBish.png"));
+      Image bQueen = ImageIO.read(new File("resources/bQueen.png"));
+      Image wQueen = ImageIO.read(new File("resources/wQueen.png"));
+      Image bPawn = ImageIO.read(new File("resources/bPawn.png"));
+      Image wPawn = ImageIO.read(new File("resources/wPawn.png"));
+      Image bKing = ImageIO.read(new File("resources/bKing.png"));
+      Image wKing = ImageIO.read(new File("resources/wKing.png"));
 
-    // pawns
-    for (int f = 0; f < 8; f++) {
-      // black pawns
-      board[1][f] = new Pawn(false);
-      // white pawns
-      board[6][f] = new Pawn(true);
+      // black rooks
+      board[0][0] = new Rook(PlayerSide.BLACK, bRook);
+      board[0][7] = new Rook(PlayerSide.BLACK, bRook);
+      // white rooks
+      board[7][0] = new Rook(PlayerSide.WHITE, wRook);
+      board[7][7] = new Rook(PlayerSide.WHITE, wRook);
+      // black bishops
+      board[0][2] = new Bishop(PlayerSide.BLACK, bBishop);
+      board[0][5] = new Bishop(PlayerSide.BLACK, bBishop);
+      // white bishops
+      board[7][2] = new Bishop(PlayerSide.WHITE, wBishop);
+      board[7][5] = new Bishop(PlayerSide.WHITE, wBishop);
+      // black knights
+      board[0][1] = new Knight(PlayerSide.BLACK, bKnight);
+      board[0][6] = new Knight(PlayerSide.BLACK, bKnight);
+      // white knights
+      board[7][1] = new Knight(PlayerSide.WHITE, wKnight);
+      board[7][6] = new Knight(PlayerSide.WHITE, wKnight);
+      // black king and queen
+      board[0][3] = new Queen(PlayerSide.BLACK, bQueen);
+      board[0][4] = new King(PlayerSide.BLACK, wKing);
+      blackKingCoords[0] = 0;
+      blackKingCoords[1] = 4;
+      // white king and queen
+      board[7][3] = new Queen(PlayerSide.WHITE, wQueen);
+      board[7][4] = new King(PlayerSide.WHITE, wKing);
+      whiteKingCoords[0] = 7;
+      whiteKingCoords[1] = 4;
+
+      // rows of pawns
+      for (int f = 0; f < 8; f++) {
+        // black pawns
+        board[1][f] = new Pawn(PlayerSide.BLACK, bPawn);
+        // white pawns
+        board[6][f] = new Pawn(PlayerSide.WHITE, wPawn);
+      }
+    } catch (IOException readError) {
+    BoardView.throwErrorFrame("Error!",
+        "Unable to load piece images, verify resource contents.");
     }
   }
 
@@ -77,7 +104,7 @@ public class ChessModelImpl implements ChessModel {
       throw new IllegalArgumentException("There is no piece at the selected starting space.");
     }
     // make sure that the destination does not have a piece from the same team
-    if (destinationPiece != null && destinationPiece.isFirst == selectedPiece.isFirst) {
+    if (destinationPiece != null && destinationPiece.side == selectedPiece.side) {
       throw new IllegalArgumentException("There is already an allied piece in that destination.");
     }
 
@@ -97,13 +124,13 @@ public class ChessModelImpl implements ChessModel {
             // white has just moved - since this variable only updates on actual moves
             if (whitesTurn) {
               // see if the white piece put the black king in check
-              if (!boardCopy[r][f].isFirst &&
-                boardCopy[r][f].canMoveTo(r, f, bKing[0], bKing[1], boardCopy)) {
+              if (boardCopy[r][f].side == PlayerSide.BLACK &&
+                boardCopy[r][f].canMoveTo(r, f, blackKingCoords[0], blackKingCoords[1], boardCopy)) {
                 bCheck = true;
               }
               // check if white would place itself in check with this move
-              else if (!boardCopy[r][f].isFirst
-                  && boardCopy[r][f].canMoveTo(r, f, wKing[0], wKing[1], boardCopy)) {
+              else if (boardCopy[r][f].side == PlayerSide.BLACK
+                  && boardCopy[r][f].canMoveTo(r, f, whiteKingCoords[0], whiteKingCoords[1], boardCopy)) {
                 throw new IllegalArgumentException("White side cannot expose its king!");
               }
 
@@ -111,13 +138,13 @@ public class ChessModelImpl implements ChessModel {
             // black turn
             else {
               // see if the black piece put the white king in check
-              if (boardCopy[r][f].isFirst &&
-                  boardCopy[r][f].canMoveTo(r, f, wKing[0], wKing[1], boardCopy)) {
+              if (boardCopy[r][f].side == PlayerSide.WHITE &&
+                  boardCopy[r][f].canMoveTo(r, f, whiteKingCoords[0], whiteKingCoords[1], boardCopy)) {
                 wCheck = true;
               }
               // if a white piece can now move to the location of the black king
-              else if (boardCopy[r][f].isFirst
-                  && boardCopy[r][f].canMoveTo(r, f, bKing[0], bKing[1], boardCopy)) {
+              else if (boardCopy[r][f].side == PlayerSide.WHITE
+                  && boardCopy[r][f].canMoveTo(r, f, blackKingCoords[0], blackKingCoords[1], boardCopy)) {
                 throw new IllegalArgumentException("Black side cannot expose its king!");
               }
             }
@@ -126,14 +153,14 @@ public class ChessModelImpl implements ChessModel {
       }
       // make sure that king location arrays are updated
       // update white king position
-      if (wKing[0] == fromRank && wKing[1] == fromFile) {
-        wKing[0] = toRank;
-        wKing[1] = toFile;
+      if (whiteKingCoords[0] == fromRank && whiteKingCoords[1] == fromFile) {
+        whiteKingCoords[0] = toRank;
+        whiteKingCoords[1] = toFile;
       }
       // update black king position
-      else if (bKing[0] == fromRank && bKing[1] == fromFile) {
-        bKing[0] = toRank;
-        bKing[1] = toFile;
+      else if (blackKingCoords[0] == fromRank && blackKingCoords[1] == fromFile) {
+        blackKingCoords[0] = toRank;
+        blackKingCoords[1] = toFile;
       }
 
       board[toRank][toFile] = board[fromRank][fromFile];
@@ -157,6 +184,19 @@ public class ChessModelImpl implements ChessModel {
       }
     }
     return boardCopy;
+  }
+
+  @Override
+  public Image[][] getBoardIcons() {
+    Image[][] boardPieceImages = new Image[8][8];
+    for (int r = 0; r < 8; r++) {
+      for (int f = 0; f < 8; f++) {
+        if (board[r][f] != null) {
+          boardPieceImages[r][f] = board[r][f].pieceImg;
+        }
+      }
+    }
+    return boardPieceImages;
   }
 
   @Override

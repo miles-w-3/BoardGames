@@ -7,36 +7,23 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.MouseListener;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 import javax.swing.JPanel;
-import model.AbstractGamePiece;
+import util.Coordinate;
 
 public class ChessBoardPanel extends JPanel {
-
-  private AbstractGamePiece[][] chessBoard;
+  // list of chess icons to display
+  private Image[][] chessBoardIcons;
+  // the currently selected box, if any
+  protected Coordinate selectedBox;
   private static final Color LIGHT_TILE = new Color(217, 179, 130);
   private static final Color DARK_TILE = new Color(101, 67, 33);
   private static final Color SELECT_COLOR = new Color(251, 255, 130);
   private Color tileColor;
-  private Image bRook;
-  private Image wRook;
-  private Image bKnight;
-  private Image wKnight;
-  private Image bBishop;
-  private Image wBishop;
-  private Image bQueen;
-  private Image wQueen;
-  private Image bKing;
-  private Image wKing;
-  private Image bPawn;
-  private Image wPawn;
 
 
-  public ChessBoardPanel() {
+  public ChessBoardPanel(Dimension size) {
+    this.setPreferredSize(size);
     tileColor = DARK_TILE;
-    this.loadPieceImages();
   }
 
   @Override
@@ -46,7 +33,7 @@ public class ChessBoardPanel extends JPanel {
     this.setBackground(Color.BLACK);
 
     g2d.setStroke(new BasicStroke(0.1f));
-    if (chessBoard != null) {
+    if (chessBoardIcons != null) {
       for (int r = 0; r < 8; r++) {
         for (int f = 0; f < 8; f++) {
           // add the tile with proper color
@@ -54,13 +41,14 @@ public class ChessBoardPanel extends JPanel {
           g2d.setColor(tileColor); // alternate tile colors
           // set width/height of 99 for black outline on each square
           g2d.fillRect(1 + f * 100, 1 + r * 100, 99, 99);
-          // add a chess piece if present
-          if (chessBoard[r][f] != null) {
-            if (chessBoard[r][f].isSelected()) {
-              g2d.setColor(ChessBoardPanel.SELECT_COLOR); // highlight the square of a selected piece
+          // draw a piece image if present
+          if (chessBoardIcons[r][f] != null) {
+            // check whether this piece is the one selected before drawing icon
+            if (selectedBox != null && r == this.selectedBox.rank && f == this.selectedBox.file) {
+              g2d.setColor(SELECT_COLOR); // highlight the square of a selected piece
               g2d.fillRect(1 + f * 100, 1 + r * 100, 99, 99);
             }
-            g2d = this.addPieceAt(r, f, g2d);
+            this.drawPieceAt(r, f, g2d);
           }
         }
         // offset the color order for the next row
@@ -79,48 +67,13 @@ public class ChessBoardPanel extends JPanel {
   }
 
 
-  // add a piece's image at the given location to the graphics object
-  private Graphics2D addPieceAt(int r, int f, Graphics2D g2d) {
-    AbstractGamePiece currentPiece = chessBoard[r][f];
-    String pieceName = currentPiece.toString();
-    Image toDraw;
-    // piece is white
-    if (currentPiece.movesFirst()) {
-      toDraw = getImage(pieceName, wBishop, wRook, wKnight, wQueen, wKing, wPawn);
-    }
-    // piece is black
-    else {
-      toDraw = getImage(pieceName, bBishop, bRook, bKnight, bQueen, bKing, bPawn);
-    }
-    g2d.drawImage(toDraw, 20 + f * 100, 25 + r * 100, this);
-    //dg2d.fillOval(1 + f * 100, 1 + r * 100, 20, 20);
-    g2d.setColor(tileColor);
-    return g2d;
-  }
+  // draw a piece's image at the given location on the g2d object
+  private void drawPieceAt(int r, int f, Graphics2D g2d) {
+    Image pieceImg = chessBoardIcons[r][f];
 
-  private Image getImage(String pieceName, Image bishop, Image rook, Image knight, Image queen,
-      Image king, Image pawn) {
-    Image toDraw;
-    switch (pieceName) {
-      case "bishop":
-        toDraw = bishop;
-        break;
-      case "rook":
-        toDraw = rook;
-        break;
-      case "knight":
-        toDraw = knight;
-        break;
-      case "queen":
-        toDraw = queen;
-        break;
-      case "king":
-        toDraw = king;
-        break;
-      default:
-        toDraw = pawn;
-    }
-    return toDraw;
+    // draw the piece image in the relative center of the tile
+    g2d.drawImage(pieceImg, 20 + f * 100, 25 + r * 100, this);
+    g2d.setColor(tileColor);
   }
 
   // set the proper tile color to alternate
@@ -132,31 +85,13 @@ public class ChessBoardPanel extends JPanel {
     }
   }
 
-  private void loadPieceImages() {
-    try {
-      bRook = ImageIO.read(new File("resources/bRook.png"));
-      wRook = ImageIO.read(new File("resources/wRook.png"));
-      bKnight = ImageIO.read(new File("resources/bKnight.png"));
-      wKnight = ImageIO.read(new File("resources/wKnight.png"));
-      bBishop = ImageIO.read(new File("resources/bBish.png"));
-      wBishop = ImageIO.read(new File("resources/wBish.png"));
-      bQueen = ImageIO.read(new File("resources/bQueen.png"));
-      wQueen = ImageIO.read(new File("resources/wQueen.png"));
-      bPawn = ImageIO.read(new File("resources/bPawn.png"));
-      wPawn = ImageIO.read(new File("resources/wPawn.png"));
-      bKing = ImageIO.read(new File("resources/bKing.png"));
-      wKing = ImageIO.read(new File("resources/wKing.png"));
-    } catch (IOException ex) {
-      BoardView.throwErrorFrame("Error!", "Unable to load essential images.");
-    }
-  }
 
   /**
    * Update the panel's stored chess board
    *
-   * @param newChessBoard the new board that will be displayed by the panel
+   * @param newBoardIcons the new board that will be displayed by the panel
    */
-  public void setChessBoard(AbstractGamePiece[][] newChessBoard) {
-    chessBoard = newChessBoard;
+  public void setBoardIcons(Image[][] newBoardIcons) {
+    chessBoardIcons = newBoardIcons;
   }
 }

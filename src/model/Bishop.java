@@ -1,10 +1,20 @@
 package model;
 
 
+import java.awt.Image;
+import util.PlayerSide;
+
 public class Bishop extends AbstractGamePiece {
 
-  public Bishop(boolean isFirst) {
-    super(isFirst);
+
+  /**
+   * Create a game piece and assign its team.
+   *
+   * @param side The side this piece belongs to
+   * @param icon The image that will be displayed to represent this piece
+   */
+  protected Bishop(PlayerSide side, Image icon) {
+    super(side, icon);
   }
 
   /**
@@ -18,7 +28,7 @@ public class Bishop extends AbstractGamePiece {
     // if the move is a proper diagonal
     if (Math.abs(toRank - fromRank) == Math.abs(toFile - fromFile)
         //either there is no piece at the destination, or the piece is of the opposite side
-        && (destinationSpace == null || destinationSpace.isFirst != this.isFirst)) {
+        && (destinationSpace == null || destinationSpace.side != this.side)) {
 
       // these variables will store the direction of each movement component
       int rDir = 1;
@@ -54,7 +64,7 @@ public class Bishop extends AbstractGamePiece {
   }
 
   public Bishop copy() {
-    Bishop c = new Bishop(isFirst);
+    Bishop c = new Bishop(side, pieceImg);
     c.isSelected = this.isSelected;
     return c;
   }

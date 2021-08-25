@@ -1,5 +1,8 @@
 package model;
 
+import java.awt.Image;
+import util.PlayerSide;
+
 /**
  * Represents a game piece that is either on the team that moves first or its opponent.
  * Able to determine whether
@@ -7,14 +10,17 @@ package model;
 public abstract class AbstractGamePiece {
 
   protected boolean isSelected;
-  protected boolean isFirst;
+  protected Image pieceImg;
+  protected PlayerSide side;
 
   /**
    * Create a game piece and assign its team.
-   * @param isFirst true if this piece is on the team that moves first
+   * @param side The side this piece belongs to
+   * @param icon The image that will be displayed to represent this piece
    */
-  protected AbstractGamePiece(boolean isFirst) {
-    this.isFirst = isFirst;
+  protected AbstractGamePiece(PlayerSide side, Image icon) {
+    this.side = side;
+    this.pieceImg = icon;
   }
 
   /**
@@ -34,8 +40,8 @@ public abstract class AbstractGamePiece {
   /**
    * @return true if this piece is on the side that moves first
    */
-  public boolean movesFirst() {
-    return this.isFirst;
+  public PlayerSide getSide() {
+    return this.side;
   }
 
   /**

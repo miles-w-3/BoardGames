@@ -1,5 +1,8 @@
 package model;
 
+import java.awt.Image;
+import util.PlayerSide;
+
 /**
  * Represents the Queen chess Piece. Extends a rook and composes a bishop in order to have access
  * to both canMove methods.
@@ -11,11 +14,18 @@ public class Queen extends AbstractGamePiece {
   // compose a rook for access to its move calculations
   private Rook rookMoves;
 
-  protected Queen(boolean isFirst) {
-    super(isFirst);
-    this.rookMoves = new Rook(isFirst);
-    this.bishopMoves = new Bishop(isFirst);
+  /**
+   * Create a game piece and assign its team.
+   *
+   * @param side The side this piece belongs to
+   * @param icon The image that will be displayed to represent this piece
+   */
+  protected Queen(PlayerSide side, Image icon) {
+    super(side, icon);
+    this.rookMoves = new Rook(side, icon);
+    this.bishopMoves = new Bishop(side, icon);
   }
+
 
   protected boolean canMoveTo(int fromRank, int fromFile, int toRank, int toFile,
       AbstractGamePiece[][] gameBoard) {
@@ -30,7 +40,7 @@ public class Queen extends AbstractGamePiece {
   }
 
   public Queen copy() {
-    Queen c = new Queen(isFirst);
+    Queen c = new Queen(side, pieceImg);
     c.isSelected = this.isSelected;
     return c;
   }

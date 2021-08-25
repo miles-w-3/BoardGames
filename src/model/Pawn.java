@@ -1,19 +1,29 @@
 package model;
 
+import java.awt.Image;
+import util.PlayerSide;
+
 public class Pawn extends AbstractGamePiece {
 
   protected boolean hasMoved;
 
-  protected Pawn(boolean isFirst) {
-    super(isFirst);
+  /**
+   * Create a game piece and assign its team.
+   *
+   * @param side The side this piece belongs to
+   * @param icon The image that will be displayed to represent this piece
+   */
+  protected Pawn(PlayerSide side, Image icon) {
+    super(side, icon);
     hasMoved = false;
   }
+
 
   @Override
   protected boolean canMoveTo(int fromRank, int fromFile, int toRank, int toFile,
       AbstractGamePiece[][] gameBoard) {
-    // check that white pieces are moving forward
-    if (this.isFirst && toRank < fromRank) {
+    // check that white pieces are only moving forward
+    if (this.side == PlayerSide.WHITE && toRank < fromRank) {
       //if this is the first move, allow double move forward as long as both spaces in front are empty
       if (!hasMoved && fromRank - toRank == 2 && fromFile == toFile
       && gameBoard[toRank][toFile] == null && gameBoard[fromRank - 1][toFile] == null) {
@@ -28,8 +38,8 @@ public class Pawn extends AbstractGamePiece {
       return false;
     }
 
-    // checks that black pieces are moving forward
-    if (!this.isFirst && toRank > fromRank) {
+    // checks that black pieces are only moving forward
+    if (this.side == PlayerSide.BLACK && toRank > fromRank) {
       //if this is the first move, allow double move forward as long as both spaces in front are empty
       if (!hasMoved && toRank - fromRank == 2 && fromFile == toFile
           && gameBoard[toRank][toFile] == null && gameBoard[fromRank + 1][toFile] == null) {
@@ -67,7 +77,7 @@ public class Pawn extends AbstractGamePiece {
   }
 
   public Pawn copy() {
-    Pawn c = new Pawn(isFirst);
+    Pawn c = new Pawn(side, pieceImg);
     c.isSelected = this.isSelected;
     return c;
   }

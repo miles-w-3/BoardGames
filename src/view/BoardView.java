@@ -3,7 +3,9 @@ package view;
 import java.awt.event.MouseListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import model.AbstractGamePiece;
+import java.awt.Image;
+import util.Coordinate;
+import util.PlayerSide;
 
 /**
  * Represents a View for the board games.
@@ -21,10 +23,25 @@ public interface BoardView {
   void displayInfo();
 
   /**
-   * Updates the board state currently stored in the view.
-   * @param gameBoard the current board state
+   * Set the current turn to display.
    */
-  void updateGameScreen(AbstractGamePiece[][] gameBoard);
+  void setTurnInfo(PlayerSide currentSide);
+
+  /**
+   * Set the space which should be highlighted as currently selected
+   */
+  void setCurrentlySelected(Coordinate selected);
+
+  /**
+   * Set the current score for both sides
+   */
+  void setCurrentScore(int whiteScore, int blackScore);
+
+  /**
+   * Updates the board state currently stored in the view.
+   * @param gameBoardIcons the current board state
+   */
+  void updateGameScreen(Image[][] gameBoardIcons);
 
   /**
    * Create an error pop-up to display an error to the user.
