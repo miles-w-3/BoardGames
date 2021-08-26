@@ -64,6 +64,8 @@ public class Bishop extends AbstractGamePiece {
   }
 
   public Bishop copy() {
-    return new Bishop(side, pieceImg);
+    Bishop b = new Bishop(side, pieceImg);
+    b.hasMoved = hasMoved;
+    return b;
   }
 }

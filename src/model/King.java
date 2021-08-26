@@ -24,8 +24,18 @@ public class King extends AbstractGamePiece {
     boolean moveVertical = Math.abs(fromRank - toRank) == 1 && fromFile == toFile;
     boolean moveDiagonal = Math.abs(fromFile - toFile) == 1 && Math.abs(fromRank - toRank) == 1;
 
+    if (moveHorizontal || moveVertical || moveDiagonal) {
+      return true;
+    }
+
+    // Castle - see if it's on either ends of the row
+    // TODO: Need to move this stuff because we also need to check that there are pieces in between and then need to simulate the king at each space from where it is now to the destination
+    boolean castling = fromRank == toRank && (toFile == 0 || toFile == 7);
+    boolean haveNotMoved = !this.hasMoved && gameBoard[toRank][toFile] != null
+        && !gameBoard[toRank][toFile].hasMoved;
+
     // make sure that the king is only moving one space
-    return moveHorizontal || moveVertical || moveDiagonal;
+    return false;
   }
 
   @Override
@@ -34,7 +44,9 @@ public class King extends AbstractGamePiece {
   }
 
   public King copy() {
-    return new King(side, pieceImg);
+    King k = new King(side, pieceImg);
+    k.hasMoved = hasMoved;
+    return k;
   }
 
 }

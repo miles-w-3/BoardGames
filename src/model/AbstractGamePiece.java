@@ -12,6 +12,7 @@ public abstract class AbstractGamePiece {
   protected final int value; // the value of the piece to the score
   protected Image pieceImg;
   protected PlayerSide side;
+  protected boolean hasMoved; // track if piece has ever moved
 
   /**
    * Create a game piece and assign its team.
@@ -22,6 +23,7 @@ public abstract class AbstractGamePiece {
     this.side = side;
     this.pieceImg = icon;
     this.value = value;
+    this.hasMoved = false;
   }
 
   /**

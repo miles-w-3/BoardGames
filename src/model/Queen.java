@@ -40,7 +40,9 @@ public class Queen extends AbstractGamePiece {
   }
 
   public Queen copy() {
-    return new Queen(side, pieceImg);
+    Queen q = new Queen(side, pieceImg);
+    q.hasMoved = hasMoved;
+    return q;
   }
 
 

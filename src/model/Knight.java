@@ -32,7 +32,9 @@ public class Knight extends AbstractGamePiece {
   }
 
   public Knight copy() {
-    return new Knight(side, pieceImg);
+    Knight k = new Knight(side, pieceImg);
+    k.hasMoved = hasMoved;
+    return k;
   }
 
 }

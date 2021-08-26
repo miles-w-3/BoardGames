@@ -16,7 +16,6 @@ Summer 2021 - Revamped logic, added new information to interface
 
 ## Needed Gameplay features
 *(in order of importance)*
-* Add detection for stalemate
 * Add castling
 * Add queening
 * Add en passant?

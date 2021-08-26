@@ -8,6 +8,8 @@ import util.PlayerSide;
  */
 public class Rook extends AbstractGamePiece {
 
+  protected boolean hasMoved; // track if rook has moved for castling
+
   /**
    * Create a game piece and assign its team.
    *
@@ -75,6 +77,8 @@ public class Rook extends AbstractGamePiece {
   }
 
   public Rook copy() {
-    return new Rook(side, pieceImg);
+    Rook r = new Rook(side, pieceImg);
+    r.hasMoved = hasMoved;
+    return r;
   }
 }

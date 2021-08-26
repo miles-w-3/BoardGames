@@ -102,6 +102,7 @@ public class ChessModelImpl implements ChessModel {
     if (board[toRank][toFile] != null) {
       takenPieceValue = board[toRank][toFile].value;
     }
+    board[fromRank][fromFile].hasMoved = true; // mark that the piece has moved
     board[toRank][toFile] = board[fromRank][fromFile];
     board[fromRank][fromFile] = null;
     // update the king coordinates tracker if the king was moved
