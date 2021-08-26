@@ -7,7 +7,7 @@ import java.awt.event.MouseListener;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import util.Coordinate;
+import util.Coordinates;
 import util.PlayerSide;
 
 public class ChessView extends JFrame implements BoardView {
@@ -71,7 +71,7 @@ public class ChessView extends JFrame implements BoardView {
   }
 
   @Override
-  public void setCurrentlySelected(Coordinate selected) {
+  public void setCurrentlySelected(Coordinates selected) {
     this.boardPanel.selectedBox = selected;
   }
 

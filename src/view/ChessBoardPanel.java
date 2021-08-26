@@ -8,13 +8,13 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.MouseListener;
 import javax.swing.JPanel;
-import util.Coordinate;
+import util.Coordinates;
 
 public class ChessBoardPanel extends JPanel {
   // list of chess icons to display
   private Image[][] chessBoardIcons;
   // the currently selected box, if any
-  protected Coordinate selectedBox;
+  protected Coordinates selectedBox;
   private static final Color LIGHT_TILE = new Color(217, 179, 130);
   private static final Color DARK_TILE = new Color(101, 67, 33);
   private static final Color SELECT_COLOR = new Color(251, 255, 130);

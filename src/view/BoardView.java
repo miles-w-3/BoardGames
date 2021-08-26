@@ -5,7 +5,7 @@ import java.awt.event.MouseListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import java.awt.Image;
-import util.Coordinate;
+import util.Coordinates;
 import util.PlayerSide;
 
 /**
@@ -31,7 +31,7 @@ public interface BoardView {
   /**
    * Set the space which should be highlighted as currently selected.
    */
-  void setCurrentlySelected(Coordinate selected);
+  void setCurrentlySelected(Coordinates selected);
 
   /**
    * Set the current score for both sides.

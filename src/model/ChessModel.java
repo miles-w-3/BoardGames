@@ -26,6 +26,14 @@ public interface ChessModel {
       throws ChessMoveException;
 
   /**
+   * Scan for whether the side provided has been placed in checkmate.
+   *
+   * @param currentTurn the playing side that is potentially in checkmate
+   * @return true if the provided side is in checkmate
+   */
+  boolean scanForCheckmate(PlayerSide currentTurn);
+
+  /**
    * Get a copy of the current board and the pieces on it
    *
    * @return A 2D array of game pieces, where null represents an empty space

@@ -1,5 +1,8 @@
 # BoardGames(Chess)
-A project to build virtual board games in java, starting with chess.This is a side project I work on and will add features to in my downtime.
+A project to build virtual board games in java, starting with chess. This is a side project I work on and will add features to in my downtime.
+I became interested in this project because it offers a chance to practice implementation of the MVC design and
+helps me remain familiar with java as I branch out into different languages. Additionally, I was drawn to chess because
+the rules have been fully defined, allowing me to focus on programming without worrying about making game design choices.
 
 ## Progress log
 Summer 2020 - Created model, controller and view
@@ -9,24 +12,23 @@ Summer 2021 - Revamped logic, added new information to interface
 * Added info to the bottom of the screen with current turn, piece score, and room for an information message
   * Added score and current turn tracking with model and controller
 * Simplified move logic with new currentTurn abstraction, improved movement in/out of check tracking
-  * Added detection for...  
+  * Added detection for checkmate, ending the game
+  * 
 
 ## Needed Gameplay features
 *(in order of importance)*
-* force a side to move out of check
-* Add detection for checkmate
 * Add detection for stalemate
 * Add casteling
 * Add queening
-* Add en passant
+* Add en passant?
+* Research other chess particularities that should be added?
 
 ## Future interface features
-*once gameplay features are done - not in any particular order*
+*once gameplay features have been finished - not in any particular order*
+* Move counter ("Checkmated in 5 moves")
 * Timer
-* Current side moving indicator
-* Captured pieces indicator and score
+* Captured pieces addon to score
 * Toggle flipping the board based on turn
 
 ## In the future...
-* Checkers
-* What next?
+* Checkers?

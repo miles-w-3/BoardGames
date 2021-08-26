@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import javax.imageio.ImageIO;
 import util.ChessMoveException;
-import util.Coordinate;
+import util.Coordinates;
 import util.PlayerSide;
 import view.BoardView;
 
@@ -14,7 +14,7 @@ public class ChessModelImpl implements ChessModel {
 
   AbstractGamePiece[][] board;
   // store the king's coordinates for "in check" verification
-  HashMap<PlayerSide, Coordinate> kingCoords;
+  HashMap<PlayerSide, Coordinates> kingCoords;
   boolean bCheck;
   boolean wCheck;
 
@@ -65,11 +65,11 @@ public class ChessModelImpl implements ChessModel {
       // black king and queen
       board[0][3] = new Queen(PlayerSide.BLACK, bQueen);
       board[0][4] = new King(PlayerSide.BLACK, bKing);
-      kingCoords.put(PlayerSide.BLACK, new Coordinate(0, 4));
+      kingCoords.put(PlayerSide.BLACK, new Coordinates(0, 4));
       // white king and queen
       board[7][3] = new Queen(PlayerSide.WHITE, wQueen);
       board[7][4] = new King(PlayerSide.WHITE, wKing);
-      kingCoords.put(PlayerSide.WHITE, new Coordinate(7, 4));
+      kingCoords.put(PlayerSide.WHITE, new Coordinates(7, 4));
 
       // rows of pawns
       for (int f = 0; f < 8; f++) {
@@ -115,7 +115,7 @@ public class ChessModelImpl implements ChessModel {
       int toRank, int toFile) throws ChessMoveException {
     AbstractGamePiece selectedPiece = board[fromRank][fromFile];
     // coordinates of the playing side's king
-    Coordinate playingKingCoords = kingCoords.get(currentTurn);
+    Coordinates playingKingCoords = kingCoords.get(currentTurn);
     // see if king is in check before move
     boolean inCheck = isCurrentlyInCheck(currentTurn, playingKingCoords, board);
 
@@ -124,9 +124,8 @@ public class ChessModelImpl implements ChessModel {
       // see if the king is being moved this turn TODO: This boolean allows handling of castling logic, perhaps after the other in expanding the one-line movingKing if statement if it's not handling by the canmoveto of the above if
       boolean movingKing = playingKingCoords.match(fromRank, fromFile);
 
-      // update moving king coords
       AbstractGamePiece[][] boardCopy = getBoard();
-      // simulate the move on a copy of the board to see if it is possible
+      // simulate the move on a copy of the board
       boardCopy[toRank][toFile] = boardCopy[fromRank][fromFile];
       boardCopy[fromRank][fromFile] = null;
       // update the king coordinates if it was the move simulated
@@ -136,8 +135,7 @@ public class ChessModelImpl implements ChessModel {
 
       // now check if the move would leave the king in check
       boolean wouldBeInCheck = isCurrentlyInCheck(currentTurn, playingKingCoords, boardCopy);
-      validateForCheck(inCheck, wouldBeInCheck);
-
+      validateCheckScenario(inCheck, wouldBeInCheck);
       return movingKing;
     }
     // the piece could not move to the given location
@@ -148,14 +146,14 @@ public class ChessModelImpl implements ChessModel {
 
 
   // Determine whether the king is currently in check
-  private boolean isCurrentlyInCheck(PlayerSide currentTurn, Coordinate kingCoords,
+  private boolean isCurrentlyInCheck(PlayerSide sideToScan, Coordinates kingCoords,
       AbstractGamePiece[][] board) {
     // Check whether the king is currently in check
     for (int r = 0; r < 8; r++) {
       for (int f = 0; f < 8; f++) {
         AbstractGamePiece boardLocation = board[r][f];
         // see if enemy pieces can move to the king
-        if (boardLocation != null && boardLocation.side != currentTurn) {
+        if (boardLocation != null && boardLocation.side != sideToScan) {
           boolean reach = boardLocation.canMoveTo(r, f, kingCoords.rank, kingCoords.file, board);
           // return if we have found that the king is in check
           if (reach) {
@@ -168,7 +166,7 @@ public class ChessModelImpl implements ChessModel {
   }
 
   // Determine whether player being in check is properly addressed, return true if acceptable move
-  private void validateForCheck(boolean inCheck, boolean wouldBeInCheck)
+  private void validateCheckScenario(boolean inCheck, boolean wouldBeInCheck)
       throws ChessMoveException {
     // If the player would not be in check from the move then the move is good
     if (!wouldBeInCheck) {
@@ -187,6 +185,49 @@ public class ChessModelImpl implements ChessModel {
     throw new ChessMoveException(errorMsg);
   }
 
+  public boolean scanForCheckmate(PlayerSide currentTurn) {
+    Coordinates currentKingCoords = kingCoords.get(currentTurn);
+    // True if player is in check and cannot escape check
+    //boolean currentlyInCheck = isCurrentlyInCheck(currentTurn, currentKingCoords, board);
+    //boolean canEscape = canEscapeCheck(currentTurn, currentKingCoords);
+    //System.out.printf("CurrentlyInCheck is %s\n", currentlyInCheck);
+    return isCurrentlyInCheck(currentTurn, currentKingCoords, board) && canEscapeCheck(currentTurn, currentKingCoords);
+    //System.out.printf("allTogether is %s\n", allTogether);
+    //return allTogether;
+  }
+
+  // attempt to escape check using any playing side piece, return true if possible
+  private boolean canEscapeCheck(PlayerSide currentTurn, Coordinates currentKingCoords) {
+    // Loop through every piece matching the playing side
+    for (int r = 0; r < 8; r++) {
+      for (int f = 0; f < 8; f++) {
+        AbstractGamePiece boardLocation = board[r][f];
+        // see if enemy pieces can move to the king
+        if (boardLocation != null && boardLocation.side != currentTurn) {
+          // see if a black piece can move to any position to resolve check
+          for (int toR = 0; toR < 8; toR++) {
+            for (int toF = 0; toF < 8; toF++) {
+              // if the movement is valid, simulate the move
+              if (boardLocation.canMoveTo(r, f, toR, toF, board)) {
+                AbstractGamePiece[][] boardCopy = getBoard();
+                boardCopy[toR][toF] = boardCopy[r][f];
+                boardCopy[r][f] = null;
+                // update the king position if it was moved
+                if (currentKingCoords.match(r, f)) {
+                  currentKingCoords.update(toR, toF);
+                }
+                // now see if the king is still in check
+                if (!isCurrentlyInCheck(currentTurn, currentKingCoords, boardCopy)) {
+                  return true;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return false;
+  }
 
   @Override
   public AbstractGamePiece[][] getBoard() {

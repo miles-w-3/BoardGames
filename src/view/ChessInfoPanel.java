@@ -21,14 +21,13 @@ public class ChessInfoPanel extends JPanel{
     currentTurn = PlayerSide.WHITE;
     whiteScore = 0;
     blackScore = 0;
-    // TODO: For in the future if we want to set a font size
   }
 
   @Override
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
     Graphics2D g2d = (Graphics2D) g;
-    this.setBackground(Color.lightGray);
+    this.setBackground(Color.white);
 
     g2d.setStroke(new BasicStroke(0.1f));
     g2d.setColor(Color.BLACK);
