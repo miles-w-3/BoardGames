@@ -7,6 +7,7 @@ import java.util.HashMap;
 import javax.imageio.ImageIO;
 import util.ChessMoveException;
 import util.Coordinates;
+import util.GameState;
 import util.PlayerSide;
 import view.BoardView;
 
@@ -185,74 +186,82 @@ public class ChessModelImpl implements ChessModel {
     throw new ChessMoveException(errorMsg);
   }
 
-  public boolean scanForCheckmate(PlayerSide currentTurn) {
+  @Override
+  public GameState scanForMates(PlayerSide currentTurn) {
     Coordinates currentKingCoords = kingCoords.get(currentTurn);
-    // True if player is in check and cannot escape check
-    //boolean currentlyInCheck = isCurrentlyInCheck(currentTurn, currentKingCoords, board);
-    //boolean canEscape = canEscapeCheck(currentTurn, currentKingCoords);
-    //System.out.printf("CurrentlyInCheck is %s\n", currentlyInCheck);
-    return isCurrentlyInCheck(currentTurn, currentKingCoords, board) && canEscapeCheck(currentTurn, currentKingCoords);
-    //System.out.printf("allTogether is %s\n", allTogether);
-    //return allTogether;
+    boolean canMove = ableToMove(currentTurn, currentKingCoords);
+    // If the side can't move, determine if checkmate or stalemate
+    if (!canMove) {
+      boolean currentlyInCheck = isCurrentlyInCheck(currentTurn, currentKingCoords, board);
+      return currentlyInCheck ? GameState.CHECKMATE : GameState.STALEMATE;
+    }
+    // If a side can move, then we're still playing
+    return GameState.PLAYING;
   }
 
-  // attempt to escape check using any playing side piece, return true if possible
-  private boolean canEscapeCheck(PlayerSide currentTurn, Coordinates currentKingCoords) {
-    // Loop through every piece matching the playing side
-    for (int r = 0; r < 8; r++) {
-      for (int f = 0; f < 8; f++) {
-        AbstractGamePiece boardLocation = board[r][f];
-        // see if enemy pieces can move to the king
-        if (boardLocation != null && boardLocation.side != currentTurn) {
-          // see if a black piece can move to any position to resolve check
-          for (int toR = 0; toR < 8; toR++) {
-            for (int toF = 0; toF < 8; toF++) {
-              // if the movement is valid, simulate the move
-              if (boardLocation.canMoveTo(r, f, toR, toF, board)) {
-                AbstractGamePiece[][] boardCopy = getBoard();
-                boardCopy[toR][toF] = boardCopy[r][f];
-                boardCopy[r][f] = null;
-                // update the king position if it was moved
-                if (currentKingCoords.match(r, f)) {
-                  currentKingCoords.update(toR, toF);
-                }
-                // now see if the king is still in check
-                if (!isCurrentlyInCheck(currentTurn, currentKingCoords, boardCopy)) {
-                  return true;
+    // true if the given side can make a move without putting themselves in check
+    private boolean ableToMove(PlayerSide currentTurn, Coordinates currentKingCoords){
+      // Loop through every piece matching the playing side
+      for (int r = 0; r < 8; r++) {
+        for (int f = 0; f < 8; f++) {
+          AbstractGamePiece fromLocation = board[r][f];
+          // make sure that the boardLocation is an allied piece
+          if (fromLocation != null && fromLocation.side == currentTurn) {
+            // see if a black piece can move to any position to resolve check
+            for (int toR = 0; toR < 8; toR++) {
+              for (int toF = 0; toF < 8; toF++) {
+                AbstractGamePiece toLocation = board[toR][toF];
+                // make sure that the tryLocation is not an allied piece
+                if ((toLocation == null || toLocation.side != currentTurn) &&
+                    fromLocation.canMoveTo(r, f, toR, toF, board)) {
+                  // if the movement is possible, simulate the move and scan for check
+                  AbstractGamePiece[][] boardCopy = getBoard();
+                  boardCopy[toR][toF] = boardCopy[r][f];
+                  boardCopy[r][f] = null;
+                  // update the king position if it was moved
+                  if (currentKingCoords.match(r, f)) {
+                    currentKingCoords.update(toR, toF);
+                  }
+                  // now see if the king is still in check
+                  if (!isCurrentlyInCheck(currentTurn, currentKingCoords, boardCopy)) {
+                    // signal that the king can escape from check
+                    return true;
+                  }
                 }
               }
             }
           }
         }
       }
+      // there was no move that allowed the king to escape from check
+      return false;
     }
-    return false;
-  }
 
-  @Override
-  public AbstractGamePiece[][] getBoard() {
-    AbstractGamePiece[][] boardCopy = new AbstractGamePiece[8][8];
-    for (int r = 0; r < 8; r++) {
-      for (int f = 0; f < 8; f++) {
-        if (board[r][f] != null) {
-          boardCopy[r][f] = board[r][f].copy();
+
+    @Override
+    public AbstractGamePiece[][] getBoard () {
+      AbstractGamePiece[][] boardCopy = new AbstractGamePiece[8][8];
+      for (int r = 0; r < 8; r++) {
+        for (int f = 0; f < 8; f++) {
+          if (board[r][f] != null) {
+            boardCopy[r][f] = board[r][f].copy();
+          }
         }
       }
+      return boardCopy;
     }
-    return boardCopy;
-  }
 
-  @Override
-  public Image[][] getBoardIcons() {
-    Image[][] boardPieceImages = new Image[8][8];
-    for (int r = 0; r < 8; r++) {
-      for (int f = 0; f < 8; f++) {
-        if (board[r][f] != null) {
-          boardPieceImages[r][f] = board[r][f].pieceImg;
+    @Override
+    public Image[][] getBoardIcons () {
+      Image[][] boardPieceImages = new Image[8][8];
+      for (int r = 0; r < 8; r++) {
+        for (int f = 0; f < 8; f++) {
+          if (board[r][f] != null) {
+            boardPieceImages[r][f] = board[r][f].pieceImg;
+          }
         }
       }
+      return boardPieceImages;
     }
-    return boardPieceImages;
-  }
 
-}
+  }

@@ -5,6 +5,7 @@ package model;
 
 import java.awt.Image;
 import util.ChessMoveException;
+import util.GameState;
 import util.PlayerSide;
 
 public interface ChessModel {
@@ -26,12 +27,12 @@ public interface ChessModel {
       throws ChessMoveException;
 
   /**
-   * Scan for whether the side provided has been placed in checkmate.
+   * Scan for whether the side provided has been placed in checkmate or a stalemate has occurred
    *
-   * @param currentTurn the playing side that is potentially in checkmate
-   * @return true if the provided side is in checkmate
+   * @param currentTurn the side about to play
+   * @return the game state found by the scan
    */
-  boolean scanForCheckmate(PlayerSide currentTurn);
+  GameState scanForMates(PlayerSide currentTurn);
 
   /**
    * Get a copy of the current board and the pieces on it

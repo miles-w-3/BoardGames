@@ -9,6 +9,7 @@ import model.ChessModel;
 import model.ChessModelImpl;
 import util.ChessMoveException;
 import util.Coordinates;
+import util.GameState;
 import util.PlayerSide;
 import view.BoardView;
 import view.ChessView;
@@ -17,7 +18,7 @@ public class ChessController implements BoardController, MouseListener {
 
   private ChessModel model;
   private BoardView view;
-  private boolean playing;
+  private GameState gameState;
   private Coordinates moveFrom; // stores fromR, fromF if they exist, null otherwise
   private PlayerSide currentTurn;
   private HashMap<PlayerSide, Integer> score;
@@ -28,7 +29,7 @@ public class ChessController implements BoardController, MouseListener {
     score = new HashMap<>();
     score.put(PlayerSide.WHITE, 0);
     score.put(PlayerSide.BLACK, 0);
-    playing = true;
+    gameState = GameState.PLAYING;
 
     model = new ChessModelImpl();
     view = new ChessView();
@@ -59,7 +60,7 @@ public class ChessController implements BoardController, MouseListener {
   @Override
   // handle in mouseReleased rather than mouseClicked to make movement more forgiving
   public void mouseReleased(MouseEvent e) {
-    if (playing) {
+    if (gameState == GameState.PLAYING) {
       handleUserClick(e);
     }
   }
@@ -102,14 +103,17 @@ public class ChessController implements BoardController, MouseListener {
     else if (moveFrom.isValid()) {
       executeModelMove(newR, newF);
       // now that a move has been made, see if the other side has been put into checkmate
-      if (model.scanForCheckmate(currentTurn)) {
-        System.out.println("Scan for checkmate was true. Turn is: " + currentTurn.name());
-        playing = false;
-        view.setMessage("Game over! " + currentTurn.name() + " has been checkmated!",
-            new Color(8, 146, 8));
-      }
-      else {
-        System.out.println("Scan for checkmate was false. Turn is: " + currentTurn.name());
+      GameState stateCheck = model.scanForMates(currentTurn);
+      // send message to user if game state has changed
+      if (stateCheck != GameState.PLAYING) {
+        if (stateCheck == GameState.CHECKMATE) {
+          view.setMessage("Game over! " + currentTurn.name() + " has been checkmated.",
+              new Color(8, 146, 8));
+        } else if (stateCheck == GameState.STALEMATE) {
+          view.setMessage("Stalemate! " + currentTurn.name() + " cannot move.!",
+              new Color(255, 138, 0));
+        }
+        gameState = stateCheck;
       }
     }
     // If the user is not selecting one of their pieces to move
