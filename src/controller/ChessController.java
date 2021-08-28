@@ -100,20 +100,20 @@ public class ChessController implements BoardController, MouseListener {
 
     boolean possibleCastle = validateCastleConditions(newR, newF);
     // clicking on an allied piece while not attempting to castle
-    if (board[newR][newF] != null && board[newR][newF].getSide() == currentTurn) {
-      // if a from space has already been selected or castling
+    if (!possibleCastle && board[newR][newF] != null && board[newR][newF].getSide() == currentTurn) {
+      // if a from space has already been selected
       if (moveFrom.isValid() && moveFrom.match(newR, newF)) {
         moveFrom.invalidate();
       }
-      // otherwise, just selected the clicked square
-      else if (!possibleCastle) {
+      // otherwise, just selected the clicked square as long as player isn't castling
+      else {
         moveFrom.update(newR, newF);
       }
       view.setCurrentlySelected(moveFrom);
       view.setMessage("", Color.BLACK);
     }
     // valid move from selection cases, attempt to move
-    if (moveFrom.isValid() && !moveFrom.match(newR, newF)) {
+    else if (moveFrom.isValid() && !moveFrom.match(newR, newF)) {
       executeModelMove(possibleCastle, newR, newF);
     }
     // If the playing side has not yet selected a space
@@ -146,14 +146,14 @@ public class ChessController implements BoardController, MouseListener {
     else {
       try {
         if (potentialCastle) {
-          boolean longCastle = newF < moveFrom.rank;
+          boolean longCastle = moveFrom.file > newF;
+          System.out.printf("longCastle is %s, king rank is %d and rook rank is %d", longCastle, moveFrom.file, newF);
           model.attemptCastle(currentTurn, longCastle);
         } else {
           // move piece and update score
           int takenValue = model.movePiece(currentTurn, moveFrom.rank, moveFrom.file, newR, newF);
           score.replace(currentTurn, score.get(currentTurn) + takenValue);
         }
-
         // update view information
         view.updateGameScreen(model.getBoardIcons());
         toggleTurn();

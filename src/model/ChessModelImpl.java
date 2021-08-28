@@ -151,6 +151,7 @@ public class ChessModelImpl implements ChessModel {
       throw new ChessMoveException("Cannot castle when currently in check");
     }
 
+    System.out.printf("longCastle is %s\n", longCastle);
     // Attempt long castle towards file 0
     if (longCastle) {
       executeCastle(forSide, kingLoc, 0, kingLoc.file - 1, kingLoc.file - 2);
@@ -165,6 +166,7 @@ public class ChessModelImpl implements ChessModel {
     // make sure that there are no pieces in between the king and rook about to castle
     int start = Math.min(kingLoc.file, rookFile) + 1;
     int end = Math.max(kingLoc.file, rookFile);
+    System.out.printf("King file is %d, rookFile is %d; Start is %d, end is %d.\n", kingLoc.file, rookFile, start, end);
     for (int i = start; i < end; i++) {
       if (board[kingLoc.rank][i] != null) {
         throw new ChessMoveException("Cannot castle with pieces in between");
