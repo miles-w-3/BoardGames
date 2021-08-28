@@ -41,10 +41,18 @@ public abstract class AbstractGamePiece {
   // pass in the board
 
   /**
-   * @return true if this piece is on the side that moves first
+   * @return the side of this piece
    */
   public PlayerSide getSide() {
     return this.side;
+  }
+
+
+  /**
+   * @return true is this piece has moved
+   */
+  public boolean hasMoved() {
+    return this.hasMoved;
   }
 
 

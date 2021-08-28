@@ -26,6 +26,15 @@ public interface ChessModel {
   int movePiece(PlayerSide currentTurn, int fromRank, int fromFile, int toRank, int toFile)
       throws ChessMoveException;
 
+
+  /**
+   * Attempt to castle for the given side.
+   * @param forSide the side for which castling will be executed
+   * @param longCastle <c>true</c> if castling long towards file 0, false otherwise
+   * @throws ChessMoveException if castling is illegal in the current board state
+   */
+  void attemptCastle(PlayerSide forSide, boolean longCastle) throws ChessMoveException;
+
   /**
    * Scan for whether the side provided has been placed in checkmate or a stalemate has occurred
    *

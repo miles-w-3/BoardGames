@@ -36,9 +36,23 @@ public class Coordinates {
     this.file = -1;
   }
 
+  @Override
+  public String toString() {
+    return "(Rank: " + rank + ", File: " + file + ")";
+  }
+
+  public Coordinates copy() {
+    return new Coordinates(this.rank, this.file);
+  }
+
   // true if the given rank and file match the coordinate's
   public boolean match(int rank, int file) {
     return this.rank == rank && this.file == file;
+  }
+
+
+  public boolean match(Coordinates c) {
+    return this.rank == c.rank && this.file == c.file;
   }
 
 

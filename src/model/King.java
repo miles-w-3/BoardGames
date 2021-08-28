@@ -16,6 +16,10 @@ public class King extends AbstractGamePiece {
     super(side, icon, 0); // Since king is priceless, don't let value affect end score
   }
 
+  /**
+   * Note that the king's check movement and castling logic is handled by the model.
+   * This method simply checks that the king is moving a single space in any direction
+   */
   @Override
   protected boolean canMoveTo(int fromRank, int fromFile, int toRank, int toFile,
       AbstractGamePiece[][] gameBoard) {
@@ -24,18 +28,7 @@ public class King extends AbstractGamePiece {
     boolean moveVertical = Math.abs(fromRank - toRank) == 1 && fromFile == toFile;
     boolean moveDiagonal = Math.abs(fromFile - toFile) == 1 && Math.abs(fromRank - toRank) == 1;
 
-    if (moveHorizontal || moveVertical || moveDiagonal) {
-      return true;
-    }
-
-    // Castle - see if it's on either ends of the row
-    // TODO: Need to move this stuff because we also need to check that there are pieces in between and then need to simulate the king at each space from where it is now to the destination
-    boolean castling = fromRank == toRank && (toFile == 0 || toFile == 7);
-    boolean haveNotMoved = !this.hasMoved && gameBoard[toRank][toFile] != null
-        && !gameBoard[toRank][toFile].hasMoved;
-
-    // make sure that the king is only moving one space
-    return false;
+    return moveHorizontal || moveVertical || moveDiagonal;
   }
 
   @Override

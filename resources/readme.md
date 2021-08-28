@@ -1,0 +1,1 @@
+Chess piece pngs sourced from Wikimedia Commons: https://commons.wikimedia.org/wiki/Category:PNG_chess_pieces/Standard_transparent

@@ -21,7 +21,12 @@ public class ChessController implements BoardController, MouseListener {
   private GameState gameState;
   private Coordinates moveFrom; // stores fromR, fromF if they exist, null otherwise
   private PlayerSide currentTurn;
-  private HashMap<PlayerSide, Integer> score;
+  // track score for both sides
+  private final HashMap<PlayerSide, Integer> score;
+  // track whether each side has castled
+  private final HashMap<PlayerSide, Boolean> hasCastled;
+  // track the coordinates of both kings
+  private final HashMap<PlayerSide, Coordinates> kingCoords;
 
 
   public ChessController() {
@@ -29,9 +34,15 @@ public class ChessController implements BoardController, MouseListener {
     score = new HashMap<>();
     score.put(PlayerSide.WHITE, 0);
     score.put(PlayerSide.BLACK, 0);
-    gameState = GameState.PLAYING;
+    gameState = GameState.PLAYING; // initialize gamestate
+    // initialize castle tracking
+    hasCastled = new HashMap<>();
+    hasCastled.put(PlayerSide.WHITE, false);
+    hasCastled.put(PlayerSide.BLACK, false);
 
-    model = new ChessModelImpl();
+    kingCoords = new HashMap<>();
+
+    model = new ChessModelImpl(kingCoords);
     view = new ChessView();
     moveFrom = new Coordinates();
     view.setMouseListener(this);
@@ -61,7 +72,7 @@ public class ChessController implements BoardController, MouseListener {
   // handle in mouseReleased rather than mouseClicked to make movement more forgiving
   public void mouseReleased(MouseEvent e) {
     if (gameState == GameState.PLAYING) {
-      handleUserClick(e);
+      handleUserMove(e);
     }
   }
 
@@ -78,7 +89,7 @@ public class ChessController implements BoardController, MouseListener {
   }
 
   // helper to handle click across mouse listeners
-  private void handleUserClick(MouseEvent event) {
+  private void handleUserMove(MouseEvent event) {
     int newR = event.getY() / 100;
     int newF = event.getX() / 100;
     // Don't move if clicking outside of the board
@@ -87,45 +98,46 @@ public class ChessController implements BoardController, MouseListener {
     }
     AbstractGamePiece[][] board = model.getBoard();
 
-    // highlight a clicked location if it contains a piece from the playing side
+    boolean possibleCastle = validateCastleConditions(newR, newF);
+    // clicking on an allied piece while not attempting to castle
     if (board[newR][newF] != null && board[newR][newF].getSide() == currentTurn) {
-      // if clicking on the coordinates that are already selected, deselect
+      // if a from space has already been selected or castling
       if (moveFrom.isValid() && moveFrom.match(newR, newF)) {
         moveFrom.invalidate();
       }
-      else {
+      // otherwise, just selected the clicked square
+      else if (!possibleCastle) {
         moveFrom.update(newR, newF);
       }
       view.setCurrentlySelected(moveFrom);
       view.setMessage("", Color.BLACK);
     }
     // valid move from selection cases, attempt to move
-    else if (moveFrom.isValid()) {
-      executeModelMove(newR, newF);
-      // now that a move has been made, see if the other side has been put into checkmate
-      GameState stateCheck = model.scanForMates(currentTurn);
-      // send message to user if game state has changed
-      if (stateCheck != GameState.PLAYING) {
-        if (stateCheck == GameState.CHECKMATE) {
-          view.setMessage("Game over! " + currentTurn.name() + " has been checkmated.",
-              new Color(8, 146, 8));
-        } else if (stateCheck == GameState.STALEMATE) {
-          view.setMessage("Stalemate! " + currentTurn.name() + " cannot move.!",
-              new Color(255, 138, 0));
-        }
-        gameState = stateCheck;
-      }
+    if (moveFrom.isValid() && !moveFrom.match(newR, newF)) {
+      executeModelMove(possibleCastle, newR, newF);
     }
-    // If the user is not selecting one of their pieces to move
+    // If the playing side has not yet selected a space
     else {
+      // tell user to select from the playing side
       view.setMessage("Must select a " + currentTurn.name() + " piece to move",
           new Color(252, 123, 3));
     }
     view.displayInfo();
   }
 
+  // Validate whether the user is attempting to castle
+  private boolean validateCastleConditions(int newR, int newF) {
+    AbstractGamePiece[][] board = model.getBoard();
+    // TODO: Calculate if king hasn't moved, and then if move length is 2 or the last thing in the row. If that's the case, possible castle is true. Then send rook location as 0 or 7
+    // trying to move the king and king has not yet moved
+    boolean movingKing = moveFrom.match(kingCoords.get(currentTurn));
+    // moving either to the end rook or two spaces over
+    boolean movingProperly = newR == moveFrom.rank && (newF == 0 || newF == 7 || Math.abs(newF - moveFrom.file) == 2);
+    return movingKing && movingProperly;
+  }
+
   // Execute the move within the model and relay any errors to the user
-  private void executeModelMove(int newR, int newF) {
+  private void executeModelMove(boolean potentialCastle, int newR, int newF) {
     // deselect a piece if its the same as the one currently highlighted
     if (newR == moveFrom.rank && newF == moveFrom.file) {
       view.setCurrentlySelected(new Coordinates());
@@ -133,19 +145,40 @@ public class ChessController implements BoardController, MouseListener {
     // if from coords are selected and player is not clicking one of their pieces, attempt to move
     else {
       try {
-        // move piece and update score
-        int takenValue = model.movePiece(currentTurn, moveFrom.rank, moveFrom.file, newR, newF);
-        if (takenValue > 0) {
+        if (potentialCastle) {
+          boolean longCastle = newF < moveFrom.rank;
+          model.attemptCastle(currentTurn, longCastle);
+        } else {
+          // move piece and update score
+          int takenValue = model.movePiece(currentTurn, moveFrom.rank, moveFrom.file, newR, newF);
           score.replace(currentTurn, score.get(currentTurn) + takenValue);
         }
+
         // update view information
         view.updateGameScreen(model.getBoardIcons());
         toggleTurn();
+        updateGameState();
       } catch (ChessMoveException cme) {
         view.setMessage("Move Error - " + cme.getMessage(), new Color(252, 123, 3));
       } catch (IllegalArgumentException iae) {
         BoardView.throwErrorFrame("Position error", iae.getMessage());
       }
+    }
+  }
+
+  private void updateGameState() {
+    // now that a move has been made, see if the other side has been put into checkmate
+    GameState stateCheck = model.scanForMates(currentTurn);
+    // send message to user if game state has changed
+    if (stateCheck != GameState.PLAYING) {
+      if (stateCheck == GameState.CHECKMATE) {
+        view.setMessage("Game over! " + currentTurn.name() + " has been checkmated.",
+            new Color(8, 146, 8));
+      } else if (stateCheck == GameState.STALEMATE) {
+        view.setMessage("Game over - Stalemate! " + currentTurn.name() + " cannot move.!",
+            new Color(255, 138, 0));
+      }
+      gameState = stateCheck;
     }
   }
 
