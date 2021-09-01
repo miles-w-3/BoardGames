@@ -1,9 +1,14 @@
 package controller;
 
 import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.HashMap;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import model.AbstractGamePiece;
 import model.ChessModel;
 import model.ChessModelImpl;
@@ -14,7 +19,7 @@ import util.PlayerSide;
 import view.BoardView;
 import view.ChessView;
 
-public class ChessController implements BoardController, MouseListener {
+public class ChessController extends MouseAdapter implements BoardController {
 
   private ChessModel model;
   private BoardView view;
@@ -23,11 +28,10 @@ public class ChessController implements BoardController, MouseListener {
   private PlayerSide currentTurn;
   // track score for both sides
   private final HashMap<PlayerSide, Integer> score;
-  // track whether each side has castled
-  private final HashMap<PlayerSide, Boolean> hasCastled;
   // track the coordinates of both kings
   private final HashMap<PlayerSide, Coordinates> kingCoords;
-
+  // input queue for promotion choice
+  private volatile ArrayBlockingQueue<Character> inputQueue;
 
   public ChessController() {
     // initialize score keeping
@@ -35,10 +39,9 @@ public class ChessController implements BoardController, MouseListener {
     score.put(PlayerSide.WHITE, 0);
     score.put(PlayerSide.BLACK, 0);
     gameState = GameState.PLAYING; // initialize gamestate
-    // initialize castle tracking
-    hasCastled = new HashMap<>();
-    hasCastled.put(PlayerSide.WHITE, false);
-    hasCastled.put(PlayerSide.BLACK, false);
+
+    // capacity 1 blocking queue to get input from key listener and relay it to promotion logic
+    inputQueue = new ArrayBlockingQueue<>(1);
 
     kingCoords = new HashMap<>();
 
@@ -51,21 +54,10 @@ public class ChessController implements BoardController, MouseListener {
 
   @Override
   public void playGame() {
-    while (true) {
-      view.updateGameScreen(model.getBoardIcons());
-      view.displayBoard();
-      view.displayInfo();
-    }
-  }
-
-  @Override
-  public void mouseClicked(MouseEvent e) {
-
-  }
-
-  @Override
-  public void mousePressed(MouseEvent e) {
-
+    view.updateGameScreen(model.getBoardIcons());
+    view.displayBoard();
+    view.displayInfo();
+    // everything else his handled by the mouse listener
   }
 
   @Override
@@ -111,6 +103,8 @@ public class ChessController implements BoardController, MouseListener {
       }
       view.setCurrentlySelected(moveFrom);
       view.setMessage("", Color.BLACK);
+      view.displayBoard();
+      view.displayInfo();
     }
     // valid move from selection cases, attempt to move
     else if (moveFrom.isValid() && !moveFrom.match(newR, newF)) {
@@ -127,8 +121,6 @@ public class ChessController implements BoardController, MouseListener {
 
   // Validate whether the user is attempting to castle
   private boolean validateCastleConditions(int newR, int newF) {
-    AbstractGamePiece[][] board = model.getBoard();
-    // TODO: Calculate if king hasn't moved, and then if move length is 2 or the last thing in the row. If that's the case, possible castle is true. Then send rook location as 0 or 7
     // trying to move the king and king has not yet moved
     boolean movingKing = moveFrom.match(kingCoords.get(currentTurn));
     // moving either to the end rook or two spaces over
@@ -153,6 +145,9 @@ public class ChessController implements BoardController, MouseListener {
           // move piece and update score
           int takenValue = model.movePiece(currentTurn, moveFrom.rank, moveFrom.file, newR, newF);
           score.replace(currentTurn, score.get(currentTurn) + takenValue);
+          if (model.shouldBePromoted(currentTurn, newR, newF)) {
+            handlePromotion(newR, newF);
+          }
         }
         // update view information
         view.updateGameScreen(model.getBoardIcons());
@@ -195,7 +190,48 @@ public class ChessController implements BoardController, MouseListener {
     // set score info
     view.setCurrentScore(score.get(PlayerSide.WHITE), score.get(PlayerSide.BLACK));
     // clear the moveFrom tracker and selection
-    moveFrom = new Coordinates();
+    moveFrom.invalidate();
     view.setCurrentlySelected(moveFrom);
+  }
+
+  // handle promotion of the piece at the given location
+  private void handlePromotion(int row, int col) {
+    view.setMessage("Promotion: q) queen | r) rook | k) knight | b) bishop", Color.CYAN);
+    view.displayInfo();
+    // update view information
+    view.updateGameScreen(model.getBoardIcons());
+    view.displayBoard();
+    boolean successfulPromotion = false;
+    gameState = GameState.PROMOTING;
+    System.out.println("Handling promotion");
+    System.out.println("Beginning loop");
+    String choice = view.getUserPromotionChoice();
+    successfulPromotion = model.promote(choice, row, col);
+    System.out.printf("Promotion success was: %s", successfulPromotion);
+
+    gameState = GameState.PLAYING;
+    System.out.println("Ended loop");
+    view.setMessage("", Color.BLACK);
+    view.displayInfo();
+    view.displayBoard();
+  }
+
+  private class PromotionListener extends KeyAdapter {
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+      System.out.printf("In keypressed, keyEvent is %s\n", e.getKeyChar());
+
+      try {
+        ChessController.this.inputQueue.put(e.getKeyChar());
+        /*if (ChessController.this.gameState == GameState.PROMOTING) {
+          System.out.printf("Adding %s to queue\n", e.getKeyChar());
+          ChessController.this.inputQueue.clear();
+          ChessController.this.inputQueue.put(e.getKeyChar());
+        }*/
+      } catch (InterruptedException error) {
+        BoardView.throwErrorFrame("Key read error", error.getMessage());
+      }
+    }
   }
 }

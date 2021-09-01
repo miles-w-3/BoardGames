@@ -19,6 +19,20 @@ public class ChessModelImpl implements ChessModel {
   boolean bCheck;
   boolean wCheck;
 
+  Image wRook;
+  Image bRook;
+  Image wKnight;
+  Image bKnight;
+  Image wBishop;
+  Image bBishop;
+  Image bQueen;
+  Image wQueen;
+  Image bPawn;
+  Image wPawn;
+  Image bKing;
+  Image wKing;
+
+
   public ChessModelImpl(HashMap<PlayerSide, Coordinates> kingCoords) {
     board = new AbstractGamePiece[8][8];
     this.kingCoords = kingCoords;
@@ -32,18 +46,18 @@ public class ChessModelImpl implements ChessModel {
   private void setupBoard() {
     // read the images from disk once
     try {
-      Image wRook = ImageIO.read(new File("resources/wRook.png"));
-      Image bRook = ImageIO.read(new File("resources/bRook.png"));
-      Image wKnight = ImageIO.read(new File("resources/wKnight.png"));
-      Image bKnight = ImageIO.read(new File("resources/bKnight.png"));
-      Image wBishop = ImageIO.read(new File("resources/wBish.png"));
-      Image bBishop = ImageIO.read(new File("resources/bBish.png"));
-      Image bQueen = ImageIO.read(new File("resources/bQueen.png"));
-      Image wQueen = ImageIO.read(new File("resources/wQueen.png"));
-      Image bPawn = ImageIO.read(new File("resources/bPawn.png"));
-      Image wPawn = ImageIO.read(new File("resources/wPawn.png"));
-      Image bKing = ImageIO.read(new File("resources/bKing.png"));
-      Image wKing = ImageIO.read(new File("resources/wKing.png"));
+      wRook = ImageIO.read(new File("resources/wRook.png"));
+      bRook = ImageIO.read(new File("resources/bRook.png"));
+      wKnight = ImageIO.read(new File("resources/wKnight.png"));
+      bKnight = ImageIO.read(new File("resources/bKnight.png"));
+      wBishop = ImageIO.read(new File("resources/wBish.png"));
+      bBishop = ImageIO.read(new File("resources/bBish.png"));
+      bQueen = ImageIO.read(new File("resources/bQueen.png"));
+      wQueen = ImageIO.read(new File("resources/wQueen.png"));
+      bPawn = ImageIO.read(new File("resources/bPawn.png"));
+      wPawn = ImageIO.read(new File("resources/wPawn.png"));
+      bKing = ImageIO.read(new File("resources/bKing.png"));
+      wKing = ImageIO.read(new File("resources/wKing.png"));
 
       // black rooks
       board[0][0] = new Rook(PlayerSide.BLACK, bRook);
@@ -140,6 +154,60 @@ public class ChessModelImpl implements ChessModel {
   }
 
   @Override
+  public boolean shouldBePromoted(PlayerSide side, int rank, int file) {
+    AbstractGamePiece piece = board[rank][file];
+    boolean isPromotableAlly = piece != null && piece.side == side && piece.isPromotable();
+    return isPromotableAlly && ((piece.side == PlayerSide.WHITE && rank == 0)
+        || (piece.side == PlayerSide.BLACK && rank == 7));
+  }
+
+  @Override
+  public boolean promote(String pieceChoice, int rank, int file) {
+    AbstractGamePiece newPiece;
+    AbstractGamePiece oldPiece = board[rank][file];
+    // TODO: How do I want to deal with images? Constants sound good
+    switch (pieceChoice) {
+      case "rook":
+        if (oldPiece.side == PlayerSide.BLACK) {
+          newPiece = new Rook(oldPiece.side, bRook);
+        }
+        else {
+          newPiece = new Rook(oldPiece.side, wRook);
+        }
+        break;
+      case "bishop":
+        if (oldPiece.side == PlayerSide.BLACK) {
+          newPiece = new Bishop(oldPiece.side, bBishop);
+        }
+        else {
+          newPiece = new Bishop(oldPiece.side, wBishop);
+        }
+        break;
+      case "knight":
+        if (oldPiece.side == PlayerSide.BLACK) {
+          newPiece = new Knight(oldPiece.side, bKnight);
+        }
+        else {
+          newPiece = new Knight(oldPiece.side, wKnight);
+        }
+        break;
+      case "queen":
+        if (oldPiece.side == PlayerSide.BLACK) {
+          newPiece = new Queen(oldPiece.side, bQueen);
+        }
+        else {
+          newPiece = new Queen(oldPiece.side, wQueen);
+        }
+        break;
+      default:
+        return false;
+    }
+    newPiece.hasMoved = true;
+    board[rank][file] = newPiece;
+    return true;
+  }
+
+  @Override
   public void attemptCastle(PlayerSide forSide, boolean longCastle) throws ChessMoveException {
     // First, check whether king has not moved
     Coordinates kingLoc = kingCoords.get(forSide);
@@ -166,7 +234,8 @@ public class ChessModelImpl implements ChessModel {
     // make sure that there are no pieces in between the king and rook about to castle
     int start = Math.min(kingLoc.file, rookFile) + 1;
     int end = Math.max(kingLoc.file, rookFile);
-    System.out.printf("King file is %d, rookFile is %d; Start is %d, end is %d.\n", kingLoc.file, rookFile, start, end);
+    System.out.printf("King file is %d, rookFile is %d; Start is %d, end is %d.\n", kingLoc.file,
+        rookFile, start, end);
     for (int i = start; i < end; i++) {
       if (board[kingLoc.rank][i] != null) {
         throw new ChessMoveException("Cannot castle with pieces in between");

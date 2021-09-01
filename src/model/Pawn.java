@@ -82,5 +82,10 @@ public class Pawn extends AbstractGamePiece {
     return c;
   }
 
+  @Override
+  public boolean isPromotable() {
+    return true;
+  }
+
 
 }

@@ -49,10 +49,10 @@ public abstract class AbstractGamePiece {
 
 
   /**
-   * @return true is this piece has moved
+   * @return true if this piece should be promoted if it reaches the other side
    */
-  public boolean hasMoved() {
-    return this.hasMoved;
+  public boolean isPromotable() {
+    return false;
   }
 
 

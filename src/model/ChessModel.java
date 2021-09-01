@@ -29,11 +29,27 @@ public interface ChessModel {
 
   /**
    * Attempt to castle for the given side.
-   * @param forSide the side for which castling will be executed
+   *
+   * @param forSide    the side for which castling will be executed
    * @param longCastle <c>true</c> if castling long towards file 0, false otherwise
    * @throws ChessMoveException if castling is illegal in the current board state
    */
   void attemptCastle(PlayerSide forSide, boolean longCastle) throws ChessMoveException;
+
+  /**
+   * See whether the piece at the given coordinates should be promoted
+   */
+  boolean shouldBePromoted(PlayerSide side, int rank, int file);
+
+  /**
+   * Swap out the piece at the given location with the new choice.
+   *
+   * @param pieceChoice the name of the piece to promote
+   * @param rank        promoting piece rank
+   * @param file        promoting piece file
+   * @return true if promotion was successful
+   */
+  boolean promote(String pieceChoice, int rank, int file);
 
   /**
    * Scan for whether the side provided has been placed in checkmate or a stalemate has occurred

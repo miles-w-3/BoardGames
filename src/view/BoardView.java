@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.Color;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -87,4 +88,11 @@ public interface BoardView {
    * @param l the desired listener
    */
   void setMouseListener(MouseListener l);
+
+  /**
+   * Open a dialogue window to get the user's choice for promotion and return it
+   * @return the name of the piece that a pawn will be promoted to
+   */
+  String getUserPromotionChoice();
+
 }

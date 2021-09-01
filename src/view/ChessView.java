@@ -3,6 +3,7 @@ package view;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -87,11 +88,19 @@ public class ChessView extends JFrame implements BoardView {
     infoPanel.msgText = msg;
   }
 
+  @Override
+  public String getUserPromotionChoice() {
+    // open the user dialogue, get the input
+    PromotionWindow promotionWin = new PromotionWindow();
+    return promotionWin.getUserChoice();
+  }
+
 
   @Override
   public void setMouseListener(MouseListener l) {
     boardPanel.setBoardMouseListener(l);
   }
+
 }
 
 
