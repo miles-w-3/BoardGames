@@ -125,7 +125,7 @@ public class ChessModelImpl implements ChessModel {
     if (selectedPiece.canMoveTo(fromRank, fromFile, toRank, toFile, board)) {
       AbstractGamePiece[][] boardCopy = getBoard();
       // simulate the move on a copy of the board
-      executeMove(fromRank, fromFile, toRank, toFile, boardCopy);
+      simulateMove(fromRank, fromFile, toRank, toFile, boardCopy);
       // update the king coordinates if it was the move simulated
       if (movingKing) {
         playingKingCoords.update(toRank, toFile);
@@ -140,7 +140,7 @@ public class ChessModelImpl implements ChessModel {
         takenPieceValue = board[toRank][toFile].value;
       }
       // now that checks have passed, execute the standard move
-      executeMove(fromRank, fromFile, toRank, toFile, board);
+      executeMove(fromRank, fromFile, toRank, toFile);
       // update the king coordinates tracker if the king was moved
       if (movingKing) {
         kingCoords.get(currentTurn).update(toRank, toFile);
@@ -244,9 +244,9 @@ public class ChessModelImpl implements ChessModel {
     // next, make sure that the king does not go through check when moving to the new spot
     verifyCastleThroughCheck(currentTurn, kingLoc, firstMove, secondMove);
     // move king to new spot
-    executeMove(kingLoc.rank, kingLoc.file, kingLoc.rank, secondMove, board);
+    executeMove(kingLoc.rank, kingLoc.file, kingLoc.rank, secondMove);
     // move rook to new spot
-    executeMove(kingLoc.rank, rookFile, kingLoc.rank, firstMove, board);
+    executeMove(kingLoc.rank, rookFile, kingLoc.rank, firstMove);
     // update king position
     kingCoords.get(currentTurn).update(kingLoc.rank, secondMove);
   }
@@ -255,12 +255,12 @@ public class ChessModelImpl implements ChessModel {
   private void verifyCastleThroughCheck(PlayerSide currentTurn, Coordinates kingLoc,
       int firstMove, int secondMove) throws ChessMoveException {
     AbstractGamePiece[][] boardCopy = getBoard();
-    executeMove(kingLoc.rank, kingLoc.file, kingLoc.rank, firstMove, boardCopy);
+    simulateMove(kingLoc.rank, kingLoc.file, kingLoc.rank, firstMove, boardCopy);
     boolean validMoves = !isCurrentlyInCheck(currentTurn,
         new Coordinates(kingLoc.rank, firstMove), boardCopy);
     // attempt the second move
     if (validMoves) {
-      executeMove(kingLoc.rank, firstMove, kingLoc.rank, secondMove, boardCopy);
+      simulateMove(kingLoc.rank, firstMove, kingLoc.rank, secondMove, boardCopy);
       validMoves = !isCurrentlyInCheck(currentTurn,
           new Coordinates(kingLoc.rank, secondMove), boardCopy);
     }
@@ -343,7 +343,7 @@ public class ChessModelImpl implements ChessModel {
                   fromLocation.canMoveTo(r, f, toR, toF, board)) {
                 // if the movement is possible, simulate the move and scan for check
                 AbstractGamePiece[][] boardCopy = getBoard();
-                executeMove(r, f, toR, toF, boardCopy);
+                simulateMove(r, f, toR, toF, boardCopy);
                 // update the king position if it was moved in the simulated board
                 if (currentKingCoords.match(r, f)) {
                   currentKingCoords.update(toR, toF);
@@ -363,13 +363,19 @@ public class ChessModelImpl implements ChessModel {
     return false;
   }
 
-  // move the piece to the new space, settings the contents of the old space to null on given board
-  private void executeMove(int fromR, int fromF, int toR, int toF, AbstractGamePiece[][] board) {
+  // move the piece to the new space, settings the contents of the old space to null on game board
+  private void executeMove(int fromR, int fromF, int toR, int toF) {
     board[fromR][fromF].hasMoved = true;
     board[toR][toF] = board[fromR][fromF];
     board[fromR][fromF] = null;
   }
 
+  // simulate the move on the given board copy
+  private void simulateMove(int fromR, int fromF, int toR, int toF, AbstractGamePiece[][] board) {
+    board[fromR][fromF].hasMoved = true;
+    board[toR][toF] = board[fromR][fromF];
+    board[fromR][fromF] = null;
+  }
 
   @Override
   public AbstractGamePiece[][] getBoard() {
