@@ -46,6 +46,7 @@ public class ChessModelImpl implements ChessModel {
   private void setupBoard() {
     // read the images from disk once
     try {
+      /*
       wRook = ImageIO.read(new File("resources/wRook.png"));
       bRook = ImageIO.read(new File("resources/bRook.png"));
       wKnight = ImageIO.read(new File("resources/wKnight.png"));
@@ -58,6 +59,20 @@ public class ChessModelImpl implements ChessModel {
       wPawn = ImageIO.read(new File("resources/wPawn.png"));
       bKing = ImageIO.read(new File("resources/bKing.png"));
       wKing = ImageIO.read(new File("resources/wKing.png"));
+      */
+
+      wRook = ImageIO.read(ClassLoader.getSystemResource("wRook.png"));
+      bRook = ImageIO.read(ClassLoader.getSystemResource("bRook.png"));
+      wKnight = ImageIO.read(ClassLoader.getSystemResource("wKnight.png"));
+      bKnight = ImageIO.read(ClassLoader.getSystemResource("bKnight.png"));
+      wBishop = ImageIO.read(ClassLoader.getSystemResource("wBish.png"));
+      bBishop = ImageIO.read(ClassLoader.getSystemResource("bBish.png"));
+      bQueen = ImageIO.read(ClassLoader.getSystemResource("bQueen.png"));
+      wQueen = ImageIO.read(ClassLoader.getSystemResource("wQueen.png"));
+      bPawn = ImageIO.read(ClassLoader.getSystemResource("bPawn.png"));
+      wPawn = ImageIO.read(ClassLoader.getSystemResource("wPawn.png"));
+      bKing = ImageIO.read(ClassLoader.getSystemResource("bKing.png"));
+      wKing = ImageIO.read(ClassLoader.getSystemResource("wKing.png"));
 
       // black rooks
       board[0][0] = new Rook(PlayerSide.BLACK, bRook);
@@ -95,7 +110,7 @@ public class ChessModelImpl implements ChessModel {
       }
     } catch (IOException readError) {
       BoardView.throwErrorFrame("Error!",
-          "Unable to load piece images, verify resource contents.");
+          "Unable to load piece images, verify resource contents. " + System.getProperty("user.dir"));
     }
   }
 
